@@ -498,6 +498,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      advance_music: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

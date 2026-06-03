@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+import { Home, ShoppingBag, Heart, Megaphone, MessageCircle } from "lucide-react";
 import { Logo } from "./Logo";
 import { BottomNav } from "./BottomNav";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,11 +27,34 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
   }, [user]);
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20 md:pb-8">
       <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-lg">
         <OfflineBanner />
-        <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
-          <Link to="/"><Logo /></Link>
+        <div className="mx-auto flex w-full max-w-2xl md:max-w-6xl items-center justify-between gap-4 px-4 md:px-8 py-3">
+          <Link to="/" className="shrink-0"><Logo /></Link>
+          <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
+            {[
+              { to: "/", label: "Home", icon: Home, end: true },
+              { to: "/market", label: "Market", icon: ShoppingBag },
+              { to: "/community", label: "Community", icon: Megaphone },
+              { to: "/dating", label: "Hookup", icon: Heart },
+              { to: "/chat", label: "Chat", icon: MessageCircle },
+            ].map(({ to, label, icon: Icon, end }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={end as any}
+                className={({ isActive }) =>
+                  `flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-smooth ${
+                    isActive ? "bg-primary/15 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`
+                }
+              >
+                <Icon className="h-4 w-4" />
+                <span>{label}</span>
+              </NavLink>
+            ))}
+          </nav>
           <div className="flex items-center gap-1">
             <DownloadAppButton />
             <NotificationBell />
@@ -53,7 +77,7 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-2xl px-4 py-4 animate-fade-in">{children}</main>
+      <main className="mx-auto w-full max-w-2xl md:max-w-6xl px-4 md:px-8 py-4 md:py-8 animate-fade-in">{children}</main>
       <BottomNav />
     </div>
   );
