@@ -56,11 +56,17 @@ export const MusicPlayer = () => {
     return () => { window.removeEventListener("click", tryPlay); window.removeEventListener("touchstart", tryPlay); };
   }, [playing, current?.url, current?.type]);
 
-  // Admin advances to next track when current ends → broadcasts to all
-  const onEnded = () => {
-    if (!isAdmin || playlist.length === 0) return;
-    const next = (idx + 1) % playlist.length;
-    saveTheme({ ...getTheme(), "music-index": String(next), "music-started-at": new Date().toISOString(), "music-playing": "1" });
+  // Any client advances to the next track when current ends → broadcasts to all.
+  // Server-side debounce prevents stampede when multiple clients fire near-simultaneously.
+  const onEnded = async () => {
+    if (playlist.length === 0) return;
+    if (isAdmin) {
+      const next = (idx + 1) % playlist.length;
+      await saveTheme({ ...getTheme(), "music-index": String(next), "music-started-at": new Date().toISOString(), "music-playing": "1" });
+    } else {
+      const { supabase } = await import("@/integrations/supabase/client");
+      await supabase.rpc("advance_music" as any);
+    }
   };
 
   // Hidden iframe embeds for YouTube / Spotify (no per-second sync possible)
