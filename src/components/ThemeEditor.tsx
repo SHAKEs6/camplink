@@ -83,10 +83,34 @@ export const ThemeEditor = () => {
     catch (e: any) { toast.error(e.message); } finally { setUploadingIcon(false); }
   };
 
+  const applyAutoFromUrl = async (url: string) => {
+    try {
+      const hex = await extractDominantHex(url);
+      const glow = shiftLightness(hex, 0.12);
+      const accent = complementHex(hex);
+      return {
+        "primary": hexToHsl(hex),
+        "primary-glow": hexToHsl(glow),
+        "accent": hexToHsl(accent),
+      } as ThemeMap;
+    } catch { return {} as ThemeMap; }
+  };
+
   const uploadLogo = async (file: File) => {
     setUploadingLogo(true);
-    try { const url = await uploadTo("avatars", file, "logo"); await update({ ...theme, "logo-url": url }, "App logo updated"); }
+    try {
+      const url = await uploadTo("avatars", file, "logo");
+      const auto = theme["auto-theme"] === "1" ? await applyAutoFromUrl(url) : {};
+      await update({ ...theme, ...auto, "logo-url": url }, "App logo updated");
+    }
     catch (e: any) { toast.error(e.message); } finally { setUploadingLogo(false); }
+  };
+
+  const reExtract = async () => {
+    if (!theme["logo-url"]) { toast.error("Upload a logo first"); return; }
+    const auto = await applyAutoFromUrl(theme["logo-url"]);
+    if (!Object.keys(auto).length) { toast.error("Could not extract color"); return; }
+    await update({ ...theme, ...auto }, "Theme synced to logo 🎨");
   };
 
   const savePlaylist = (tracks: Track[], extras: ThemeMap = {}) =>
