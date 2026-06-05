@@ -39,6 +39,7 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
               { to: "/community", label: "Community", icon: Megaphone },
               { to: "/dating", label: "Hookup", icon: Heart },
               { to: "/chat", label: "Chat", icon: MessageCircle },
+              { to: "/wallet", label: "Wallet", icon: Wallet },
             ].map(({ to, label, icon: Icon, end }) => (
               <NavLink
                 key={to}
