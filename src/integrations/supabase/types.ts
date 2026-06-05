@@ -88,6 +88,35 @@ export type Database = {
         }
         Relationships: []
       }
+      campaign_claims: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_claims_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "reward_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cart_items: {
         Row: {
           created_at: string
@@ -180,6 +209,27 @@ export type Database = {
           last_message_at?: string
           user_a?: string
           user_b?: string
+        }
+        Relationships: []
+      }
+      daily_bonus_claims: {
+        Row: {
+          claim_date: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          claim_date?: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          claim_date?: string
+          created_at?: string
+          id?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -437,6 +487,89 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_codes: {
+        Row: {
+          active: boolean
+          amount: number
+          code: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          max_uses: number
+          used_count: number
+        }
+        Insert: {
+          active?: boolean
+          amount: number
+          code: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number
+          used_count?: number
+        }
+        Update: {
+          active?: boolean
+          amount?: number
+          code?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number
+          used_count?: number
+        }
+        Relationships: []
+      }
+      promo_redemptions: {
+        Row: {
+          code_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          code_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          code_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_redemptions_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "promo_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          referee_id: string
+          referrer_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referee_id: string
+          referrer_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referee_id?: string
+          referrer_id?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comment: string | null
@@ -472,6 +605,39 @@ export type Database = {
           },
         ]
       }
+      reward_campaigns: {
+        Row: {
+          active: boolean
+          amount: number
+          created_at: string
+          created_by: string | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          active?: boolean
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -493,12 +659,84 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          balance_after: number
+          created_at: string
+          description: string | null
+          id: string
+          ref_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          ref_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          ref_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallets: {
+        Row: {
+          balance: number
+          created_at: string
+          frozen: boolean
+          tier: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          frozen?: boolean
+          tier?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          frozen?: boolean
+          tier?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      admin_freeze_wallet: {
+        Args: { _frozen: boolean; _uid: string }
+        Returns: undefined
+      }
+      admin_wallet_adjust: {
+        Args: { _amount: number; _note?: string; _uid: string }
+        Returns: number
+      }
       advance_music: { Args: never; Returns: undefined }
+      apply_referral: { Args: { _referrer: string }; Returns: number }
+      claim_campaign: { Args: { _cid: string }; Returns: number }
+      claim_daily_bonus: { Args: never; Returns: number }
+      ensure_wallet: { Args: { _uid: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -507,6 +745,32 @@ export type Database = {
         Returns: boolean
       }
       is_suspended: { Args: { _user_id: string }; Returns: boolean }
+      redeem_promo: { Args: { _code: string }; Returns: number }
+      tier_for: { Args: { _bal: number }; Returns: string }
+      wallet_credit: {
+        Args: {
+          _amount: number
+          _desc?: string
+          _ref?: string
+          _type: string
+          _uid: string
+        }
+        Returns: number
+      }
+      wallet_debit: {
+        Args: {
+          _amount: number
+          _desc?: string
+          _ref?: string
+          _type: string
+          _uid: string
+        }
+        Returns: number
+      }
+      wallet_transfer: {
+        Args: { _amount: number; _note?: string; _to: string }
+        Returns: number
+      }
     }
     Enums: {
       app_role: "admin" | "user"
