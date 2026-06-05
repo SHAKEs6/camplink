@@ -21,6 +21,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    // Capture referral param if present
+    try {
+      const p = new URLSearchParams(window.location.search);
+      const ref = p.get("ref");
+      if (ref) localStorage.setItem("pending_referral", ref);
+    } catch {}
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
@@ -31,6 +38,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Request phone/desktop notification permission on login
           if (typeof Notification !== "undefined" && Notification.permission === "default") {
             Notification.requestPermission().catch(() => {});
+          }
+          // Apply pending referral once
+          const ref = localStorage.getItem("pending_referral");
+          if (ref && ref !== s.user.id) {
+            supabase.rpc("apply_referral" as any, { _referrer: ref })
+              .then(({ error }) => { if (!error) localStorage.removeItem("pending_referral"); else if (/already/i.test(error.message)) localStorage.removeItem("pending_referral"); });
           }
         }, 0);
       } else {
