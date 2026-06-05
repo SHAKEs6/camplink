@@ -184,6 +184,19 @@ export const ThemeEditor = () => {
           <Input type="file" accept="image/*" disabled={uploadingLogo}
             onChange={e => { const f = e.target.files?.[0]; if (f) uploadLogo(f); }} />
         </div>
+        <div className="flex items-center justify-between rounded-md border border-border p-2">
+          <div className="flex items-center gap-2">
+            <Wand2 className="h-3 w-3 text-accent" />
+            <Label className="text-xs">Auto theme — match colors to logo</Label>
+          </div>
+          <Switch checked={theme["auto-theme"] === "1"}
+            onCheckedChange={(v) => update({ ...theme, "auto-theme": v ? "1" : "0" }, v ? "Auto theme on" : "Custom theme on")} />
+        </div>
+        {theme["auto-theme"] === "1" && (
+          <Button size="sm" variant="outline" className="w-full" onClick={reExtract}>
+            <Wand2 className="h-3 w-3 mr-1" />Re-sync theme to current logo
+          </Button>
+        )}
         <Label className="text-xs">App name (optional)</Label>
         <div className="flex gap-2">
           <Input value={theme["app-name"] ?? ""} placeholder="Camplink" onChange={e => setTheme({ ...theme, "app-name": e.target.value })} />
