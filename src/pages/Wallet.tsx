@@ -47,7 +47,7 @@ const Wallet = () => {
       supabase.from("daily_bonus_claims").select("id").eq("user_id", user.id).eq("claim_date", today).maybeSingle(),
     ]);
     if (w) { setBalance(w.balance); setTier(w.tier); setFrozen(w.frozen); }
-    else { await supabase.rpc("claim_daily_bonus" as any).catch(() => {}); }
+    else { try { await supabase.rpc("claim_daily_bonus" as any); } catch {} }
     setTxs((t as any) ?? []);
     setCampaigns((c as any) ?? []);
     setClaimedIds(new Set(((claims as any) ?? []).map((x: any) => x.campaign_id)));
