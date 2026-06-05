@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { hexToHsl, hslToHex, applyTheme, saveTheme, THEME_KEYS, ThemeMap } from "@/lib/theme";
+import { extractDominantHex, shiftLightness, complementHex } from "@/lib/colorExtract";
 import { parsePlaylist, Track } from "@/components/MusicPlayer";
-import { Palette, RotateCcw, Music, Play, Square, Image as ImageIcon, Sparkles, Plus, Trash2, SkipForward, SkipBack, Volume2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Palette, RotateCcw, Music, Play, Square, Image as ImageIcon, Sparkles, Plus, Trash2, SkipForward, SkipBack, Volume2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 
 const DEFAULTS: ThemeMap = {
@@ -81,10 +83,34 @@ export const ThemeEditor = () => {
     catch (e: any) { toast.error(e.message); } finally { setUploadingIcon(false); }
   };
 
+  const applyAutoFromUrl = async (url: string) => {
+    try {
+      const hex = await extractDominantHex(url);
+      const glow = shiftLightness(hex, 0.12);
+      const accent = complementHex(hex);
+      return {
+        "primary": hexToHsl(hex),
+        "primary-glow": hexToHsl(glow),
+        "accent": hexToHsl(accent),
+      } as ThemeMap;
+    } catch { return {} as ThemeMap; }
+  };
+
   const uploadLogo = async (file: File) => {
     setUploadingLogo(true);
-    try { const url = await uploadTo("avatars", file, "logo"); await update({ ...theme, "logo-url": url }, "App logo updated"); }
+    try {
+      const url = await uploadTo("avatars", file, "logo");
+      const auto = theme["auto-theme"] === "1" ? await applyAutoFromUrl(url) : {};
+      await update({ ...theme, ...auto, "logo-url": url }, "App logo updated");
+    }
     catch (e: any) { toast.error(e.message); } finally { setUploadingLogo(false); }
+  };
+
+  const reExtract = async () => {
+    if (!theme["logo-url"]) { toast.error("Upload a logo first"); return; }
+    const auto = await applyAutoFromUrl(theme["logo-url"]);
+    if (!Object.keys(auto).length) { toast.error("Could not extract color"); return; }
+    await update({ ...theme, ...auto }, "Theme synced to logo 🎨");
   };
 
   const savePlaylist = (tracks: Track[], extras: ThemeMap = {}) =>
@@ -158,6 +184,19 @@ export const ThemeEditor = () => {
           <Input type="file" accept="image/*" disabled={uploadingLogo}
             onChange={e => { const f = e.target.files?.[0]; if (f) uploadLogo(f); }} />
         </div>
+        <div className="flex items-center justify-between rounded-md border border-border p-2">
+          <div className="flex items-center gap-2">
+            <Wand2 className="h-3 w-3 text-accent" />
+            <Label className="text-xs">Auto theme — match colors to logo</Label>
+          </div>
+          <Switch checked={theme["auto-theme"] === "1"}
+            onCheckedChange={(v) => update({ ...theme, "auto-theme": v ? "1" : "0" }, v ? "Auto theme on" : "Custom theme on")} />
+        </div>
+        {theme["auto-theme"] === "1" && (
+          <Button size="sm" variant="outline" className="w-full" onClick={reExtract}>
+            <Wand2 className="h-3 w-3 mr-1" />Re-sync theme to current logo
+          </Button>
+        )}
         <Label className="text-xs">App name (optional)</Label>
         <div className="flex gap-2">
           <Input value={theme["app-name"] ?? ""} placeholder="Camplink" onChange={e => setTheme({ ...theme, "app-name": e.target.value })} />

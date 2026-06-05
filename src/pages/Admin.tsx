@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash2, Shield, Send, Ban, CheckCircle2, MessageCircle } from "lucide-react";
+import { Trash2, Shield, Send, Ban, CheckCircle2, MessageCircle, Wallet as WalletIcon } from "lucide-react";
 import { ThemeEditor } from "@/components/ThemeEditor";
+import { WalletAdmin } from "@/components/admin/WalletAdmin";
 import { toast } from "sonner";
 
 type Row = Record<string, any>;
@@ -104,11 +105,14 @@ const Admin = () => {
       </Card>
 
       <Tabs defaultValue="users">
-        <TabsList className="grid grid-cols-3 w-full">
+        <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="users">Users ({users.length})</TabsTrigger>
           <TabsTrigger value="listings">Listings ({listings.length})</TabsTrigger>
           <TabsTrigger value="reviews">Reviews ({reviews.length})</TabsTrigger>
+          <TabsTrigger value="wallet"><WalletIcon className="h-3 w-3 mr-1" />Wallet</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="wallet" className="mt-3"><WalletAdmin /></TabsContent>
 
         <TabsContent value="users" className="space-y-2 mt-3">
           {users.map(u => (
