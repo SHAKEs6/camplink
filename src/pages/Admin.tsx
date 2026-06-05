@@ -105,11 +105,14 @@ const Admin = () => {
       </Card>
 
       <Tabs defaultValue="users">
-        <TabsList className="grid grid-cols-3 w-full">
+        <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="users">Users ({users.length})</TabsTrigger>
           <TabsTrigger value="listings">Listings ({listings.length})</TabsTrigger>
           <TabsTrigger value="reviews">Reviews ({reviews.length})</TabsTrigger>
+          <TabsTrigger value="wallet"><WalletIcon className="h-3 w-3 mr-1" />Wallet</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="wallet" className="mt-3"><WalletAdmin /></TabsContent>
 
         <TabsContent value="users" className="space-y-2 mt-3">
           {users.map(u => (
