@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { hexToHsl, hslToHex, applyTheme, saveTheme, THEME_KEYS, ThemeMap } from "@/lib/theme";
+import { extractDominantHex, shiftLightness, complementHex } from "@/lib/colorExtract";
 import { parsePlaylist, Track } from "@/components/MusicPlayer";
-import { Palette, RotateCcw, Music, Play, Square, Image as ImageIcon, Sparkles, Plus, Trash2, SkipForward, SkipBack, Volume2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Palette, RotateCcw, Music, Play, Square, Image as ImageIcon, Sparkles, Plus, Trash2, SkipForward, SkipBack, Volume2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 
 const DEFAULTS: ThemeMap = {
