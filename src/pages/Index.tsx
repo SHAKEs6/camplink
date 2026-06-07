@@ -1,38 +1,87 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { ShoppingBag, Building2, Star, ArrowRight, Heart, Megaphone } from "lucide-react";
+import { ShoppingBag, Building2, Star, ArrowRight, Heart, Megaphone, ChevronRight, Loader2 } from "lucide-react";
 import { ListingCard, Listing } from "@/components/ListingCard";
 import { AddListingDialog } from "@/components/AddListingDialog";
 import { Button } from "@/components/ui/button";
 import { cacheGet, cacheSet } from "@/lib/offlineCache";
 import { useOnline } from "@/hooks/useOnline";
 
+
+const PAGE_SIZE = 30;
+
 const Index = () => {
   const { user } = useAuth();
   const online = useOnline();
   const [recent, setRecent] = useState<Listing[]>([]);
   const [name, setName] = useState("");
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [showHint, setShowHint] = useState(true);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { document.title = "Camplink — Campus Marketplace"; }, []);
 
-  const load = async () => {
+  const fetchPage = useCallback(async (pageIdx: number, replace = false) => {
+    if (!online) return;
+    setLoadingMore(true);
+    const from = pageIdx * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    const { data } = await supabase
+      .from("listings")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .range(from, to);
+    const rows = (data ?? []) as Listing[];
+    setHasMore(rows.length === PAGE_SIZE);
+    setRecent(prev => {
+      const merged = replace ? rows : [...prev, ...rows];
+      if (replace) cacheSet("listings:recent", merged);
+      return merged;
+    });
+    setLoadingMore(false);
+  }, [online]);
+
+  const load = useCallback(async () => {
     const cached = cacheGet<Listing[]>("listings:recent");
     if (cached) setRecent(cached);
-    if (!online) return;
-    const { data } = await supabase.from("listings").select("*").order("created_at", { ascending: false }).limit(30);
-    const rows = (data ?? []) as Listing[];
-    setRecent(rows);
-    cacheSet("listings:recent", rows);
+    setPage(0);
+    await fetchPage(0, true);
     if (user) {
       const { data: p } = await supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle();
       setName(p?.display_name ?? user.email?.split("@")[0] ?? "");
     }
-  };
+  }, [user, fetchPage]);
+
   useEffect(() => { load(); }, [user, online]);
+
+  const loadMore = useCallback(() => {
+    if (loadingMore || !hasMore) return;
+    const next = page + 1;
+    setPage(next);
+    fetchPage(next);
+  }, [page, hasMore, loadingMore, fetchPage]);
+
+  // Infinite scroll via horizontal IntersectionObserver
+  useEffect(() => {
+    const root = scrollerRef.current;
+    const target = sentinelRef.current;
+    if (!root || !target) return;
+    const io = new IntersectionObserver(
+      entries => { if (entries[0].isIntersecting) loadMore(); },
+      { root, rootMargin: "0px 300px 0px 0px", threshold: 0.1 }
+    );
+    io.observe(target);
+    return () => io.disconnect();
+  }, [loadMore, recent.length]);
+
+  const onScroll = () => { if (showHint) setShowHint(false); };
 
   return (
     <AppShell>
@@ -62,12 +111,34 @@ const Index = () => {
           <AddListingDialog onCreated={load} />
         </Card>
       ) : (
-        <div className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 snap-x snap-mandatory scrollbar-none">
-          {recent.map(l => (
-            <div key={l.id} className="snap-start shrink-0 w-44 sm:w-52">
-              <ListingCard listing={l} onDelete={load} />
+        <div className="relative -mx-4">
+          <div
+            ref={scrollerRef}
+            onScroll={onScroll}
+            className="flex gap-3 overflow-x-auto pb-3 px-4 snap-x snap-mandatory scrollbar-none scroll-smooth"
+          >
+            {recent.map(l => (
+              <div key={l.id} className="snap-start shrink-0 w-44 sm:w-52">
+                <ListingCard listing={l} onDelete={load} />
+              </div>
+            ))}
+            <div ref={sentinelRef} className="shrink-0 w-1" aria-hidden />
+            {hasMore && (
+              <div className="snap-start shrink-0 w-44 sm:w-52 flex items-center justify-center">
+                <Button variant="outline" onClick={loadMore} disabled={loadingMore} className="h-full w-full min-h-[180px] flex-col gap-2">
+                  {loadingMore ? <Loader2 className="h-5 w-5 animate-spin" /> : <ChevronRight className="h-5 w-5" />}
+                  <span className="text-xs">{loadingMore ? "Loading…" : "Load more"}</span>
+                </Button>
+              </div>
+            )}
+          </div>
+          {/* Right-edge fade + swipe hint */}
+          <div className="pointer-events-none absolute top-0 right-0 h-full w-12 bg-gradient-to-l from-background to-transparent" />
+          {showHint && recent.length >= 3 && (
+            <div className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 flex items-center gap-1 bg-primary/90 text-primary-foreground text-[10px] font-semibold px-2 py-1 rounded-full shadow-glow animate-pulse">
+              Swipe <ChevronRight className="h-3 w-3" />
             </div>
-          ))}
+          )}
         </div>
       )}
 
@@ -78,4 +149,5 @@ const Index = () => {
   );
 };
 
-export default Index;      
+export default Index;
+
