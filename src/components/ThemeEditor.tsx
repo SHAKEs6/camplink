@@ -70,8 +70,10 @@ export const ThemeEditor = () => {
   };
 
   const uploadTo = async (bucket: string, file: File, prefix: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not signed in");
     const ext = file.name.split(".").pop() || "bin";
-    const path = `${prefix}-${Date.now()}.${ext}`;
+    const path = `${user.id}/${prefix}-${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true });
     if (error) throw error;
     return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
