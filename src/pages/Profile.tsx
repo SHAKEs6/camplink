@@ -34,6 +34,13 @@ const Profile = () => {
         setAvatar(data?.avatar_url ?? null);
         setSuspended(!!data?.suspended);
       });
+    supabase.from("wallets").select("balance,tier").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => { if (data) setWallet({ balance: Number(data.balance) || 0, tier: data.tier }); });
+    const ch = supabase.channel(`wallet-profile-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "wallets", filter: `user_id=eq.${user.id}` },
+        (p: any) => p.new && setWallet({ balance: Number(p.new.balance) || 0, tier: p.new.tier }))
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, [user]);
 
   const save = async () => {
