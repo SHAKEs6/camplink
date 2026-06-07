@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { AvatarUpload } from "@/components/AvatarUpload";
-import { LogOut, Shield, Trash2, Smartphone } from "lucide-react";
+import { LogOut, Shield, Trash2, Smartphone, Wallet as WalletIcon, ChevronRight } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { isMobile, isMobileNotifyEnabled, setMobileNotifyEnabled } from "@/lib/mobileNotifications";
 import { Link, useNavigate } from "react-router-dom";
