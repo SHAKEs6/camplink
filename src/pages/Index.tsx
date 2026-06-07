@@ -23,7 +23,7 @@ const Index = () => {
     const cached = cacheGet<Listing[]>("listings:recent");
     if (cached) setRecent(cached);
     if (!online) return;
-    const { data } = await supabase.from("listings").select("*").order("created_at", { ascending: false }).limit(4);
+    const { data } = await supabase.from("listings").select("*").order("created_at", { ascending: false }).limit(30);
     const rows = (data ?? []) as Listing[];
     setRecent(rows);
     cacheSet("listings:recent", rows);
