@@ -20,6 +20,7 @@ const Profile = () => {
   const [phone, setPhone] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
   const [suspended, setSuspended] = useState(false);
+  const [wallet, setWallet] = useState<{ balance: number; tier: string } | null>(null);
 
   const [mobileNotify, setMobileNotify] = useState(isMobileNotifyEnabled());
   useEffect(() => { document.title = "Profile — Camplink"; }, []);
