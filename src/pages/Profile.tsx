@@ -85,6 +85,23 @@ const Profile = () => {
         <Button className="w-full gradient-accent" onClick={save}>Save profile</Button>
       </Card>
 
+      <Link to="/wallet">
+        <Card className="p-4 gradient-card mt-3 hover:shadow-glow transition-smooth flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="h-10 w-10 rounded-full gradient-accent flex items-center justify-center shrink-0">
+              <WalletIcon className="h-5 w-5 text-white" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-semibold text-sm">My Wallet</p>
+              <p className="text-xs text-muted-foreground">
+                {wallet ? `${wallet.balance.toLocaleString()} pts · ${wallet.tier}` : "View balance & rewards"}
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+        </Card>
+      </Link>
+
       {isAdmin && (
         <Link to="/admin"><Card className="p-4 gradient-card mt-3 hover:shadow-glow transition-smooth flex items-center gap-3"><Shield className="h-5 w-5 text-accent" /><span className="font-semibold">Open Admin Panel</span></Card></Link>
       )}
