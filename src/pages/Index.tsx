@@ -23,7 +23,7 @@ const Index = () => {
     const cached = cacheGet<Listing[]>("listings:recent");
     if (cached) setRecent(cached);
     if (!online) return;
-    const { data } = await supabase.from("listings").select("*").order("created_at", { ascending: false }).limit(4);
+    const { data } = await supabase.from("listings").select("*").order("created_at", { ascending: false }).limit(30);
     const rows = (data ?? []) as Listing[];
     setRecent(rows);
     cacheSet("listings:recent", rows);
@@ -62,8 +62,12 @@ const Index = () => {
           <AddListingDialog onCreated={load} />
         </Card>
       ) : (
-        <div className="grid grid-cols-2 gap-3">
-          {recent.map(l => <ListingCard key={l.id} listing={l} onDelete={load} />)}
+        <div className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 snap-x snap-mandatory scrollbar-none">
+          {recent.map(l => (
+            <div key={l.id} className="snap-start shrink-0 w-44 sm:w-52">
+              <ListingCard listing={l} onDelete={load} />
+            </div>
+          ))}
         </div>
       )}
 
