@@ -62,8 +62,12 @@ const Index = () => {
           <AddListingDialog onCreated={load} />
         </Card>
       ) : (
-        <div className="grid grid-cols-2 gap-3">
-          {recent.map(l => <ListingCard key={l.id} listing={l} onDelete={load} />)}
+        <div className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 snap-x snap-mandatory scrollbar-none">
+          {recent.map(l => (
+            <div key={l.id} className="snap-start shrink-0 w-44 sm:w-52">
+              <ListingCard listing={l} onDelete={load} />
+            </div>
+          ))}
         </div>
       )}
 
