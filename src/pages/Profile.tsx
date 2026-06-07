@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { AvatarUpload } from "@/components/AvatarUpload";
-import { LogOut, Shield, Trash2, Smartphone } from "lucide-react";
+import { LogOut, Shield, Trash2, Smartphone, Wallet as WalletIcon, ChevronRight } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { isMobile, isMobileNotifyEnabled, setMobileNotifyEnabled } from "@/lib/mobileNotifications";
 import { Link, useNavigate } from "react-router-dom";
@@ -20,6 +20,7 @@ const Profile = () => {
   const [phone, setPhone] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
   const [suspended, setSuspended] = useState(false);
+  const [wallet, setWallet] = useState<{ balance: number; tier: string } | null>(null);
 
   const [mobileNotify, setMobileNotify] = useState(isMobileNotifyEnabled());
   useEffect(() => { document.title = "Profile — Camplink"; }, []);
@@ -33,6 +34,13 @@ const Profile = () => {
         setAvatar(data?.avatar_url ?? null);
         setSuspended(!!data?.suspended);
       });
+    supabase.from("wallets").select("balance,tier").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => { if (data) setWallet({ balance: Number(data.balance) || 0, tier: data.tier }); });
+    const ch = supabase.channel(`wallet-profile-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "wallets", filter: `user_id=eq.${user.id}` },
+        (p: any) => p.new && setWallet({ balance: Number(p.new.balance) || 0, tier: p.new.tier }))
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, [user]);
 
   const save = async () => {
@@ -76,6 +84,23 @@ const Profile = () => {
         <div><Label>Phone</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+254…" maxLength={30} /></div>
         <Button className="w-full gradient-accent" onClick={save}>Save profile</Button>
       </Card>
+
+      <Link to="/wallet">
+        <Card className="p-4 gradient-card mt-3 hover:shadow-glow transition-smooth flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="h-10 w-10 rounded-full gradient-accent flex items-center justify-center shrink-0">
+              <WalletIcon className="h-5 w-5 text-white" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-semibold text-sm">My Wallet</p>
+              <p className="text-xs text-muted-foreground">
+                {wallet ? `${wallet.balance.toLocaleString()} pts · ${wallet.tier}` : "View balance & rewards"}
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+        </Card>
+      </Link>
 
       {isAdmin && (
         <Link to="/admin"><Card className="p-4 gradient-card mt-3 hover:shadow-glow transition-smooth flex items-center gap-3"><Shield className="h-5 w-5 text-accent" /><span className="font-semibold">Open Admin Panel</span></Card></Link>
