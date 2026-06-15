@@ -4,7 +4,7 @@ import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { ShoppingBag, Building2, Star, ArrowRight, Heart, Megaphone, ChevronRight, Loader2 } from "lucide-react";
+import { ShoppingBag, Building2, Star, ArrowRight, Heart, Megaphone, ChevronRight, Loader2, Film } from "lucide-react";
 import { ListingCard, Listing } from "@/components/ListingCard";
 import { AddListingDialog } from "@/components/AddListingDialog";
 import { Button } from "@/components/ui/button";
