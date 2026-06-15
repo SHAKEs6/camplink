@@ -130,16 +130,15 @@ const CommentsSheet = ({ reelId, onClose }: { reelId: string; onClose: () => voi
   const [input, setInput] = useState("");
 
   const load = useCallback(async () => {
-    const { data } = await (supabase as any)
-      .from("reel_comments")
-      .select("id, content, user_id, created_at, profiles:profiles!reel_comments_user_id_fkey(display_name)")
-      .eq("reel_id", reelId)
-      .order("created_at", { ascending: false });
-    if (data) setComments(data);
-    else {
-      const { data: d2 } = await (supabase as any).from("reel_comments").select("*").eq("reel_id", reelId).order("created_at", { ascending: false });
-      setComments(d2 ?? []);
+    const { data } = await (supabase as any).from("reel_comments").select("*").eq("reel_id", reelId).order("created_at", { ascending: false });
+    const list = data ?? [];
+    const ids = Array.from(new Set(list.map((c: any) => c.user_id)));
+    if (ids.length) {
+      const { data: profs } = await supabase.from("profiles").select("id,display_name").in("id", ids as string[]);
+      const map = new Map(profs?.map(p => [p.id, p.display_name]));
+      list.forEach((c: any) => { c.display_name = map.get(c.user_id) ?? "User"; });
     }
+    setComments(list);
   }, [reelId]);
 
   useEffect(() => { load(); }, [load]);
