@@ -149,6 +149,36 @@ export type Database = {
           },
         ]
       }
+      chat_groups: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          last_message_at: string
+          name: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          last_message_at?: string
+          name: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          last_message_at?: string
+          name?: string
+        }
+        Relationships: []
+      }
       community_posts: {
         Row: {
           body: string | null
@@ -304,6 +334,38 @@ export type Database = {
           reactor_id?: string
         }
         Relationships: []
+      }
+      group_messages: {
+        Row: {
+          content: string
+          created_at: string
+          group_id: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          group_id: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          group_id?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_messages_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "chat_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       listing_reviews: {
         Row: {
@@ -548,6 +610,117 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      reel_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          reel_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          reel_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          reel_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reel_comments_reel_id_fkey"
+            columns: ["reel_id"]
+            isOneToOne: false
+            referencedRelation: "reels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reel_likes: {
+        Row: {
+          created_at: string
+          reel_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          reel_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          reel_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reel_likes_reel_id_fkey"
+            columns: ["reel_id"]
+            isOneToOne: false
+            referencedRelation: "reels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reel_saves: {
+        Row: {
+          created_at: string
+          reel_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          reel_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          reel_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reel_saves_reel_id_fkey"
+            columns: ["reel_id"]
+            isOneToOne: false
+            referencedRelation: "reels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reels: {
+        Row: {
+          caption: string | null
+          created_at: string
+          created_by: string
+          id: string
+          thumbnail_url: string | null
+          video_url: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          thumbnail_url?: string | null
+          video_url: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          thumbnail_url?: string | null
+          video_url?: string
+        }
+        Relationships: []
       }
       referrals: {
         Row: {
