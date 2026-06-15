@@ -166,9 +166,9 @@ const CommentsSheet = ({ reelId, onClose }: { reelId: string; onClose: () => voi
           <Button size="icon" variant="ghost" onClick={onClose}><X className="h-4 w-4" /></Button>
         </div>
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {comments.length === 0 ? <p className="text-center text-muted-foreground text-sm py-8">Be the first to comment</p> : comments.map(c => (
+          {comments.length === 0 ? <p className="text-center text-muted-foreground text-sm py-8">Be the first to comment</p> : comments.map((c: any) => (
             <div key={c.id} className="bg-secondary/40 rounded-lg p-2">
-              <p className="text-xs font-semibold">{c.profiles?.display_name ?? "User"}</p>
+              <p className="text-xs font-semibold">{c.display_name ?? "User"}</p>
               <p className="text-sm">{c.content}</p>
             </div>
           ))}
