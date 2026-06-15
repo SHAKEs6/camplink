@@ -224,7 +224,8 @@ const Reels = () => {
   }, [activeIdx, hasMore, loading, page, fetchPage]);
 
   return (
-    <AppShell hideHeader>
+    <div className="relative">
+      <Link to="/" className="fixed top-3 left-3 z-40 bg-black/50 text-white rounded-full px-3 py-1 text-xs font-semibold backdrop-blur">← Home</Link>
       <div ref={scrollerRef} className="fixed inset-0 h-[100svh] w-full overflow-y-auto snap-y snap-mandatory bg-black z-10">
         {reels.length === 0 && !loading && (
           <div className="h-[100svh] flex items-center justify-center text-white/70">No reels yet</div>
@@ -237,7 +238,8 @@ const Reels = () => {
         )}
       </div>
       {commentsFor && <CommentsSheet reelId={commentsFor} onClose={() => setCommentsFor(null)} />}
-    </AppShell>
+      <div className="relative z-30"><BottomNav /></div>
+    </div>
   );
 };
 
