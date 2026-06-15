@@ -20,6 +20,7 @@ import DatingEdit from "./pages/DatingEdit.tsx";
 import Community from "./pages/Community.tsx";
 import Anon from "./pages/Anon.tsx";
 import Wallet from "./pages/Wallet.tsx";
+import Reels from "./pages/Reels.tsx";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { RealtimeNotificationPopup } from "./components/RealtimeNotificationPopup";
 import { MusicPlayer } from "./components/MusicPlayer";
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/dating/edit" element={<ProtectedRoute><DatingEdit /></ProtectedRoute>} />
             <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
             <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+            <Route path="/reels" element={<ProtectedRoute><Reels /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

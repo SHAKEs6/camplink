@@ -4,7 +4,7 @@ import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { ShoppingBag, Building2, Star, ArrowRight, Heart, Megaphone, ChevronRight, Loader2 } from "lucide-react";
+import { ShoppingBag, Building2, Star, ArrowRight, Heart, Megaphone, ChevronRight, Loader2, Film } from "lucide-react";
 import { ListingCard, Listing } from "@/components/ListingCard";
 import { AddListingDialog } from "@/components/AddListingDialog";
 import { Button } from "@/components/ui/button";
@@ -97,6 +97,7 @@ const Index = () => {
           <Link to="/community"><Card className="bg-white/15 backdrop-blur border-white/20 p-3 text-center hover:bg-white/25 transition-smooth"><Megaphone className="h-6 w-6 mx-auto text-white mb-1" /><p className="text-xs font-semibold text-white">Community</p></Card></Link>
           <Link to="/reviews"><Card className="bg-white/15 backdrop-blur border-white/20 p-3 text-center hover:bg-white/25 transition-smooth"><Star className="h-6 w-6 mx-auto text-white mb-1" /><p className="text-xs font-semibold text-white">Reviews</p></Card></Link>
           <Link to="/anon"><Card className="bg-white/15 backdrop-blur border-white/20 p-3 text-center hover:bg-white/25 transition-smooth"><span className="block text-2xl mb-0.5">🤫</span><p className="text-xs font-semibold text-white">How Was It?</p></Card></Link>
+          <Link to="/reels" className="col-span-2"><Card className="bg-gradient-to-r from-pink-500/30 to-violet-500/30 backdrop-blur border-white/20 p-3 text-center hover:from-pink-500/40 hover:to-violet-500/40 transition-smooth"><Film className="h-6 w-6 mx-auto text-white mb-1" /><p className="text-xs font-semibold text-white">🎬 Reels — swipe up</p></Card></Link>
         </div>
       </section>
 
