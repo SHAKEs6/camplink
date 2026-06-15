@@ -9,9 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash2, Shield, Send, Ban, CheckCircle2, MessageCircle, Wallet as WalletIcon } from "lucide-react";
+import { Trash2, Shield, Send, Ban, CheckCircle2, MessageCircle, Wallet as WalletIcon, Film, Users } from "lucide-react";
 import { ThemeEditor } from "@/components/ThemeEditor";
 import { WalletAdmin } from "@/components/admin/WalletAdmin";
+import { ReelsAdmin } from "@/components/admin/ReelsAdmin";
+import { GroupChatAdmin } from "@/components/admin/GroupChatAdmin";
 import { toast } from "sonner";
 
 type Row = Record<string, any>;
