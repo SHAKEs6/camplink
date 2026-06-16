@@ -616,6 +616,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          parent_id: string | null
           reel_id: string
           user_id: string
         }
@@ -623,6 +624,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          parent_id?: string | null
           reel_id: string
           user_id: string
         }
@@ -630,10 +632,18 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          parent_id?: string | null
           reel_id?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "reel_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "reel_comments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reel_comments_reel_id_fkey"
             columns: ["reel_id"]
@@ -701,6 +711,7 @@ export type Database = {
           created_at: string
           created_by: string
           id: string
+          source_type: string
           thumbnail_url: string | null
           video_url: string
         }
@@ -709,6 +720,7 @@ export type Database = {
           created_at?: string
           created_by: string
           id?: string
+          source_type?: string
           thumbnail_url?: string | null
           video_url: string
         }
@@ -717,6 +729,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           id?: string
+          source_type?: string
           thumbnail_url?: string | null
           video_url?: string
         }
