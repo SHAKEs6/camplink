@@ -59,6 +59,7 @@ const ReelMedia = ({ reel, active, muted, onToggleMute }: { reel: Reel; active: 
           allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
           allowFullScreen
           referrerPolicy="strict-origin-when-cross-origin"
+          sandbox="allow-scripts allow-same-origin allow-presentation allow-popups-to-escape-sandbox"
           title={`reel-${reel.id}`}
         />
       ) : (
