@@ -1,16 +1,17 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { ShoppingBag, Building2, Star, ArrowRight, Heart, Megaphone, ChevronRight, Loader2, Film } from "lucide-react";
+import { ShoppingBag, Building2, Star, ArrowRight, Heart, Megaphone, Loader2, Film, Search, TrendingUp, Sparkles, Flame } from "lucide-react";
 import { ListingCard, Listing } from "@/components/ListingCard";
 import { AddListingDialog } from "@/components/AddListingDialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { cacheGet, cacheSet } from "@/lib/offlineCache";
 import { useOnline } from "@/hooks/useOnline";
-
 
 const PAGE_SIZE = 30;
 
@@ -22,8 +23,9 @@ const Index = () => {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [showHint, setShowHint] = useState(true);
-  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [query, setQuery] = useState("");
+  const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [stats, setStats] = useState({ listings: 0, users: 0, today: 0 });
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { document.title = "Camplink — Campus Marketplace"; }, []);
@@ -57,6 +59,14 @@ const Index = () => {
       const { data: p } = await supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle();
       setName(p?.display_name ?? user.email?.split("@")[0] ?? "");
     }
+    // Cool stat counters
+    const since = new Date(); since.setHours(0, 0, 0, 0);
+    const [{ count: lc }, { count: uc }, { count: tc }] = await Promise.all([
+      supabase.from("listings").select("id", { count: "exact", head: true }),
+      supabase.from("profiles").select("id", { count: "exact", head: true }),
+      supabase.from("listings").select("id", { count: "exact", head: true }).gte("created_at", since.toISOString()),
+    ]);
+    setStats({ listings: lc ?? 0, users: uc ?? 0, today: tc ?? 0 });
   }, [user, fetchPage]);
 
   useEffect(() => { load(); }, [user, online]);
@@ -68,20 +78,40 @@ const Index = () => {
     fetchPage(next);
   }, [page, hasMore, loadingMore, fetchPage]);
 
-  // Infinite scroll via horizontal IntersectionObserver
+  // Vertical infinite scroll on window
   useEffect(() => {
-    const root = scrollerRef.current;
     const target = sentinelRef.current;
-    if (!root || !target) return;
+    if (!target) return;
     const io = new IntersectionObserver(
       entries => { if (entries[0].isIntersecting) loadMore(); },
-      { root, rootMargin: "0px 300px 0px 0px", threshold: 0.1 }
+      { rootMargin: "600px 0px 600px 0px", threshold: 0.01 }
     );
     io.observe(target);
     return () => io.disconnect();
   }, [loadMore, recent.length]);
 
-  const onScroll = () => { if (showHint) setShowHint(false); };
+  const trendingTags = useMemo(() => {
+    const counts = new Map<string, number>();
+    recent.forEach(r => {
+      const t = (r.subcategory || r.category || "").toString().trim();
+      if (t) counts.set(t, (counts.get(t) ?? 0) + 1);
+    });
+    return Array.from(counts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([t]) => t);
+  }, [recent]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return recent.filter(l => {
+      if (activeTag && (l.subcategory || l.category) !== activeTag) return false;
+      if (!q) return true;
+      return (l.title?.toLowerCase().includes(q) || l.description?.toLowerCase().includes(q) || l.location?.toLowerCase().includes(q));
+    });
+  }, [recent, query, activeTag]);
+
+  const featured = useMemo(() => {
+    // Top by price as a simple "premium picks" highlight
+    return [...recent].sort((a, b) => Number(b.price) - Number(a.price)).slice(0, 6);
+  }, [recent]);
 
   return (
     <AppShell>
@@ -90,6 +120,18 @@ const Index = () => {
         <div className="pointer-events-none absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-violet-400/40 blur-3xl animate-neon-float [animation-delay:-3s]" />
         <p className="text-white/90 text-sm font-medium">Hey {name || "there"} 👋</p>
         <h1 className="text-white text-3xl font-extrabold leading-tight mt-1 neon-glow-text">What are you<br />looking for today?</h1>
+
+        {/* Search bar */}
+        <div className="relative mt-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search listings, places, items…"
+            className="pl-9 bg-white/15 backdrop-blur border-white/20 text-white placeholder:text-white/60"
+          />
+        </div>
+
         <div className="grid grid-cols-2 gap-2 mt-5">
           <Link to="/market"><Card className="bg-white/15 backdrop-blur border-white/20 p-3 text-center hover:bg-white/25 transition-smooth"><ShoppingBag className="h-6 w-6 mx-auto text-white mb-1" /><p className="text-xs font-semibold text-white">Marketplace</p></Card></Link>
           <Link to="/housing"><Card className="bg-white/15 backdrop-blur border-white/20 p-3 text-center hover:bg-white/25 transition-smooth"><Building2 className="h-6 w-6 mx-auto text-white mb-1" /><p className="text-xs font-semibold text-white">Housing</p></Card></Link>
@@ -101,46 +143,92 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Live stats strip */}
+      <div className="grid grid-cols-3 gap-2 mb-5">
+        <Card className="p-3 text-center gradient-card">
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Listings</p>
+          <p className="text-lg font-extrabold">{stats.listings.toLocaleString()}</p>
+        </Card>
+        <Card className="p-3 text-center gradient-card">
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Members</p>
+          <p className="text-lg font-extrabold">{stats.users.toLocaleString()}</p>
+        </Card>
+        <Card className="p-3 text-center gradient-card">
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center justify-center gap-1"><Flame className="h-3 w-3" />Today</p>
+          <p className="text-lg font-extrabold">{stats.today.toLocaleString()}</p>
+        </Card>
+      </div>
+
+      {/* Trending tags */}
+      {trendingTags.length > 0 && (
+        <div className="mb-5">
+          <div className="flex items-center gap-1.5 mb-2 text-sm font-semibold"><TrendingUp className="h-4 w-4 text-primary" /> Trending</div>
+          <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1 -mx-4 px-4">
+            <Badge
+              variant={activeTag === null ? "default" : "secondary"}
+              className="cursor-pointer shrink-0"
+              onClick={() => setActiveTag(null)}
+            >All</Badge>
+            {trendingTags.map(t => (
+              <Badge
+                key={t}
+                variant={activeTag === t ? "default" : "secondary"}
+                className="cursor-pointer shrink-0 capitalize"
+                onClick={() => setActiveTag(activeTag === t ? null : t)}
+              >#{t}</Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Featured picks */}
+      {featured.length > 0 && !query && !activeTag && (
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-bold flex items-center gap-1.5"><Sparkles className="h-4 w-4 text-primary" /> Featured Picks</h2>
+          </div>
+          <div className="-mx-4 flex gap-3 overflow-x-auto pb-3 px-4 snap-x snap-mandatory scrollbar-none">
+            {featured.map(l => (
+              <div key={l.id} className="snap-start shrink-0 w-44 sm:w-52">
+                <ListingCard listing={l} onDelete={load} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-xl font-bold">Recent Listings</h2>
         <Link to="/market" className="text-sm text-primary flex items-center gap-1">See all <ArrowRight className="h-3 w-3" /></Link>
       </div>
 
-      {recent.length === 0 ? (
+      {filtered.length === 0 ? (
         <Card className="p-8 text-center gradient-card">
-          <p className="text-muted-foreground mb-3">No listings yet — be the first!</p>
-          <AddListingDialog onCreated={load} />
+          <p className="text-muted-foreground mb-3">{recent.length === 0 ? "No listings yet — be the first!" : "No matches for your search."}</p>
+          {recent.length === 0 && <AddListingDialog onCreated={load} />}
         </Card>
       ) : (
-        <div className="relative -mx-4">
-          <div
-            ref={scrollerRef}
-            onScroll={onScroll}
-            className="flex gap-3 overflow-x-auto pb-3 px-4 snap-x snap-mandatory scrollbar-none scroll-smooth"
-          >
-            {recent.map(l => (
-              <div key={l.id} className="snap-start shrink-0 w-44 sm:w-52">
-                <ListingCard listing={l} onDelete={load} />
-              </div>
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {filtered.map(l => (
+              <ListingCard key={l.id} listing={l} onDelete={load} />
             ))}
-            <div ref={sentinelRef} className="shrink-0 w-1" aria-hidden />
-            {hasMore && (
-              <div className="snap-start shrink-0 w-44 sm:w-52 flex items-center justify-center">
-                <Button variant="outline" onClick={loadMore} disabled={loadingMore} className="h-full w-full min-h-[180px] flex-col gap-2">
-                  {loadingMore ? <Loader2 className="h-5 w-5 animate-spin" /> : <ChevronRight className="h-5 w-5" />}
-                  <span className="text-xs">{loadingMore ? "Loading…" : "Load more"}</span>
-                </Button>
+          </div>
+
+          <div ref={sentinelRef} className="h-10" aria-hidden />
+
+          <div className="flex justify-center py-6">
+            {loadingMore ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Loading more…
               </div>
+            ) : hasMore ? (
+              <Button variant="outline" onClick={loadMore}>Load more</Button>
+            ) : (
+              <p className="text-xs text-muted-foreground">🎉 You're all caught up</p>
             )}
           </div>
-          {/* Right-edge fade + swipe hint */}
-          <div className="pointer-events-none absolute top-0 right-0 h-full w-12 bg-gradient-to-l from-background to-transparent" />
-          {showHint && recent.length >= 3 && (
-            <div className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 flex items-center gap-1 bg-primary/90 text-primary-foreground text-[10px] font-semibold px-2 py-1 rounded-full shadow-glow animate-pulse">
-              Swipe <ChevronRight className="h-3 w-3" />
-            </div>
-          )}
-        </div>
+        </>
       )}
 
       <div className="fixed bottom-24 right-4 z-40">
@@ -151,4 +239,3 @@ const Index = () => {
 };
 
 export default Index;
-
