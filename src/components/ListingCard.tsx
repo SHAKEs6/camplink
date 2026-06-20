@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { PhotoLightbox } from "./PhotoLightbox";
 import { ListingReviewsDialog } from "./ListingReviewsDialog";
+import { MpesaPayDialog } from "./MpesaPayDialog";
 
 export type Listing = {
   id: string;
@@ -105,6 +106,9 @@ export const ListingCard = ({ listing, onDelete }: { listing: Listing; onDelete?
           {listing.contact_email && <Button size="sm" variant="outline" className="h-7 text-[11px]" asChild><a href={`mailto:${listing.contact_email}`}><Mail className="h-3 w-3 mr-1" />Email</a></Button>}
           {user && user.id !== listing.user_id && <Button size="sm" className="h-7 text-[11px] gradient-accent" onClick={startChat}><MessageCircle className="h-3 w-3 mr-1" />Chat</Button>}
           {user && user.id !== listing.user_id && <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={addToCart}><ShoppingCart className="h-3 w-3 mr-1" />Cart</Button>}
+          {user && user.id !== listing.user_id && Number(listing.price) > 0 && (
+            <MpesaPayDialog listingId={listing.id} price={Number(listing.price)} title={listing.title} />
+          )}
           <ListingReviewsDialog listingId={listing.id} />
           {canDelete && <Button size="sm" variant="ghost" className="h-7 text-[11px] text-destructive" onClick={remove}><Trash2 className="h-3 w-3" /></Button>}
         </div>
