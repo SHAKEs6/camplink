@@ -516,6 +516,71 @@ export type Database = {
         }
         Relationships: []
       }
+      orders: {
+        Row: {
+          amount: number
+          buyer_id: string
+          checkout_request_id: string | null
+          created_at: string
+          id: string
+          listing_id: string | null
+          merchant_request_id: string | null
+          mpesa_receipt: string | null
+          phone: string
+          quantity: number
+          raw_callback: Json | null
+          result_code: number | null
+          result_desc: string | null
+          seller_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          buyer_id: string
+          checkout_request_id?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string | null
+          merchant_request_id?: string | null
+          mpesa_receipt?: string | null
+          phone: string
+          quantity?: number
+          raw_callback?: Json | null
+          result_code?: number | null
+          result_desc?: string | null
+          seller_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          buyer_id?: string
+          checkout_request_id?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string | null
+          merchant_request_id?: string | null
+          mpesa_receipt?: string | null
+          phone?: string
+          quantity?: number
+          raw_callback?: Json | null
+          result_code?: number | null
+          result_desc?: string | null
+          seller_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
