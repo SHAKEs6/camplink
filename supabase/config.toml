@@ -1,1 +1,4 @@
 project_id = "ramtywjithozulwnbcsg"
+
+[functions.mpesa-callback]
+verify_jwt = false
