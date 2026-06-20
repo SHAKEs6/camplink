@@ -61,11 +61,24 @@ export const MpesaPayDialog = ({ listingId, price, title, quantity = 1, trigger 
     const { data, error } = await supabase.functions.invoke("mpesa-stk-push", {
       body: { listing_id: listingId, phone, quantity },
     });
-    if (error || (data as any)?.error) {
+    // Extract real error body even when invoke flags a non-2xx
+    let errMsg: string | null = null;
+    if (error) {
+      try {
+        const ctx = (error as any).context;
+        if (ctx && typeof ctx.json === "function") {
+          const body = await ctx.json();
+          errMsg = body?.error || body?.message || null;
+        }
+      } catch {}
+      errMsg = errMsg || error.message || "Failed to start payment";
+    } else if ((data as any)?.error) {
+      errMsg = (data as any).error;
+    }
+    if (errMsg) {
       setStatus("failed");
-      const m = (data as any)?.error || error?.message || "Failed to start payment";
-      setMsg(m);
-      toast.error(m);
+      setMsg(errMsg);
+      toast.error(errMsg);
       return;
     }
     const oid = (data as any).order_id as string;
