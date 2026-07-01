@@ -115,65 +115,92 @@ const Index = () => {
 
   return (
     <AppShell>
-      <section className="relative overflow-hidden rounded-3xl gradient-hero p-6 shadow-neon mb-6">
-        <div className="pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full bg-fuchsia-400/40 blur-3xl animate-neon-float" />
-        <div className="pointer-events-none absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-violet-400/40 blur-3xl animate-neon-float [animation-delay:-3s]" />
-        <p className="text-white/90 text-sm font-medium">Hey {name || "there"} 👋</p>
-        <h1 className="text-white text-3xl font-extrabold leading-tight mt-1 neon-glow-text">What are you<br />looking for today?</h1>
+      {/* Magazine masthead */}
+      <section className="relative mb-8 overflow-hidden rounded-2xl gradient-hero p-6 md:p-10 shadow-lux ring-gold">
+        <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-primary/30 blur-3xl animate-neon-float" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-accent/20 blur-3xl animate-neon-float [animation-delay:-4s]" />
+
+        <div className="relative flex items-center justify-between">
+          <span className="kicker text-gold">Camplink · Issue N°{String(stats.today || 1).padStart(2, "0")}</span>
+          <span className="kicker text-white/60 hidden sm:block">{new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}</span>
+        </div>
+        <div className="hairline-gold my-4" />
+
+        <h1 className="relative font-serif text-white text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-tight">
+          Good evening, <em className="italic text-gold">{name || "friend"}</em>.<br />
+          <span className="text-white/85">Your campus, curated.</span>
+        </h1>
+        <p className="relative mt-4 max-w-xl text-white/75 text-sm md:text-base leading-relaxed">
+          A private marketplace, community and social club for students — refined, real-time, and richly rewarding.
+        </p>
 
         {/* Search bar */}
-        <div className="relative mt-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
+        <div className="relative mt-6 max-w-xl">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/60" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search listings, places, items…"
-            className="pl-9 bg-white/15 backdrop-blur border-white/20 text-white placeholder:text-white/60"
+            placeholder="Search the marketplace, housing, people…"
+            className="pl-10 h-12 rounded-full bg-white/10 backdrop-blur border-white/15 text-white placeholder:text-white/50 focus-visible:ring-accent"
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-2 mt-5">
-          <Link to="/market"><Card className="bg-white/15 backdrop-blur border-white/20 p-3 text-center hover:bg-white/25 transition-smooth"><ShoppingBag className="h-6 w-6 mx-auto text-white mb-1" /><p className="text-xs font-semibold text-white">Marketplace</p></Card></Link>
-          <Link to="/housing"><Card className="bg-white/15 backdrop-blur border-white/20 p-3 text-center hover:bg-white/25 transition-smooth"><Building2 className="h-6 w-6 mx-auto text-white mb-1" /><p className="text-xs font-semibold text-white">Housing</p></Card></Link>
-          <Link to="/dating"><Card className="bg-white/15 backdrop-blur border-white/20 p-3 text-center hover:bg-white/25 transition-smooth"><Heart className="h-6 w-6 mx-auto text-white mb-1" /><p className="text-xs font-semibold text-white">Hookup 💖</p></Card></Link>
-          <Link to="/community"><Card className="bg-white/15 backdrop-blur border-white/20 p-3 text-center hover:bg-white/25 transition-smooth"><Megaphone className="h-6 w-6 mx-auto text-white mb-1" /><p className="text-xs font-semibold text-white">Community</p></Card></Link>
-          <Link to="/reviews"><Card className="bg-white/15 backdrop-blur border-white/20 p-3 text-center hover:bg-white/25 transition-smooth"><Star className="h-6 w-6 mx-auto text-white mb-1" /><p className="text-xs font-semibold text-white">Reviews</p></Card></Link>
-          <Link to="/anon"><Card className="bg-white/15 backdrop-blur border-white/20 p-3 text-center hover:bg-white/25 transition-smooth"><span className="block text-2xl mb-0.5">🤫</span><p className="text-xs font-semibold text-white">How Was It?</p></Card></Link>
-          <Link to="/reels" className="col-span-2"><Card className="bg-gradient-to-r from-pink-500/30 to-violet-500/30 backdrop-blur border-white/20 p-3 text-center hover:from-pink-500/40 hover:to-violet-500/40 transition-smooth"><Film className="h-6 w-6 mx-auto text-white mb-1" /><p className="text-xs font-semibold text-white">🎬 Reels — swipe up</p></Card></Link>
+        {/* Section chips */}
+        <div className="relative mt-6 grid grid-cols-3 sm:grid-cols-6 gap-2">
+          {[
+            { to: "/market", label: "Market", icon: ShoppingBag },
+            { to: "/housing", label: "Housing", icon: Building2 },
+            { to: "/dating", label: "Hookup", icon: Heart },
+            { to: "/community", label: "Community", icon: Megaphone },
+            { to: "/reviews", label: "Reviews", icon: Star },
+            { to: "/reels", label: "Reels", icon: Film },
+          ].map(({ to, label, icon: Icon }) => (
+            <Link key={to} to={to} className="group">
+              <div className="flex flex-col items-center gap-1.5 rounded-xl bg-white/8 backdrop-blur ring-1 ring-white/10 py-3 transition-smooth hover:bg-white/15 hover:ring-accent/40">
+                <Icon className="h-4 w-4 text-accent" />
+                <span className="kicker text-white/85">{label}</span>
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
 
-      {/* Live stats strip */}
-      <div className="grid grid-cols-3 gap-2 mb-5">
-        <Card className="p-3 text-center gradient-card">
-          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Listings</p>
-          <p className="text-lg font-extrabold">{stats.listings.toLocaleString()}</p>
-        </Card>
-        <Card className="p-3 text-center gradient-card">
-          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Members</p>
-          <p className="text-lg font-extrabold">{stats.users.toLocaleString()}</p>
-        </Card>
-        <Card className="p-3 text-center gradient-card">
-          <p className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center justify-center gap-1"><Flame className="h-3 w-3" />Today</p>
-          <p className="text-lg font-extrabold">{stats.today.toLocaleString()}</p>
-        </Card>
+
+      {/* Editorial stats strip */}
+      <div className="grid grid-cols-3 gap-3 mb-8">
+        {[
+          { label: "Listings", value: stats.listings },
+          { label: "Members", value: stats.users },
+          { label: "Today", value: stats.today, icon: Flame },
+        ].map(({ label, value, icon: Icon }) => (
+          <Card key={label} className="relative overflow-hidden p-4 gradient-card ring-gold">
+            <span className="kicker text-muted-foreground flex items-center gap-1">
+              {Icon && <Icon className="h-3 w-3 text-accent" />} {label}
+            </span>
+            <p className="font-serif text-3xl md:text-4xl mt-1 text-gold">{value.toLocaleString()}</p>
+          </Card>
+        ))}
       </div>
 
       {/* Trending tags */}
       {trendingTags.length > 0 && (
-        <div className="mb-5">
-          <div className="flex items-center gap-1.5 mb-2 text-sm font-semibold"><TrendingUp className="h-4 w-4 text-primary" /> Trending</div>
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp className="h-4 w-4 text-accent" />
+            <span className="kicker text-muted-foreground">In circulation</span>
+            <div className="hairline-gold flex-1" />
+          </div>
           <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1 -mx-4 px-4">
             <Badge
               variant={activeTag === null ? "default" : "secondary"}
-              className="cursor-pointer shrink-0"
+              className="cursor-pointer shrink-0 rounded-full"
               onClick={() => setActiveTag(null)}
             >All</Badge>
             {trendingTags.map(t => (
               <Badge
                 key={t}
                 variant={activeTag === t ? "default" : "secondary"}
-                className="cursor-pointer shrink-0 capitalize"
+                className="cursor-pointer shrink-0 rounded-full capitalize"
                 onClick={() => setActiveTag(activeTag === t ? null : t)}
               >#{t}</Badge>
             ))}
@@ -181,15 +208,20 @@ const Index = () => {
         </div>
       )}
 
-      {/* Featured picks */}
+      {/* Featured — magazine hero row */}
       {featured.length > 0 && !query && !activeTag && (
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold flex items-center gap-1.5"><Sparkles className="h-4 w-4 text-primary" /> Featured Picks</h2>
+        <div className="mb-10">
+          <div className="flex items-end justify-between mb-4">
+            <div>
+              <span className="kicker text-accent flex items-center gap-1"><Sparkles className="h-3 w-3" /> The Editors' Selection</span>
+              <h2 className="font-serif text-3xl md:text-4xl mt-1">Featured this week</h2>
+            </div>
+            <Link to="/market" className="hidden md:inline-flex kicker text-muted-foreground hover:text-accent items-center gap-1">Browse all <ArrowRight className="h-3 w-3" /></Link>
           </div>
-          <div className="-mx-4 flex gap-3 overflow-x-auto pb-3 px-4 snap-x snap-mandatory scrollbar-none">
+          <div className="hairline-gold mb-4" />
+          <div className="-mx-4 flex gap-4 overflow-x-auto pb-3 px-4 snap-x snap-mandatory scrollbar-none">
             {featured.map(l => (
-              <div key={l.id} className="snap-start shrink-0 w-44 sm:w-52">
+              <div key={l.id} className="snap-start shrink-0 w-48 sm:w-56 md:w-64">
                 <ListingCard listing={l} onDelete={load} />
               </div>
             ))}
@@ -197,10 +229,15 @@ const Index = () => {
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-xl font-bold">Recent Listings</h2>
-        <Link to="/market" className="text-sm text-primary flex items-center gap-1">See all <ArrowRight className="h-3 w-3" /></Link>
+      <div className="flex items-end justify-between mb-4">
+        <div>
+          <span className="kicker text-accent">Latest dispatches</span>
+          <h2 className="font-serif text-3xl md:text-4xl mt-1">Recent Listings</h2>
+        </div>
+        <Link to="/market" className="kicker text-muted-foreground hover:text-accent flex items-center gap-1">See all <ArrowRight className="h-3 w-3" /></Link>
       </div>
+      <div className="hairline-gold mb-5" />
+
 
       {filtered.length === 0 ? (
         <Card className="p-8 text-center gradient-card">

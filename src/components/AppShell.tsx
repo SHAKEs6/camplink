@@ -77,7 +77,9 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
             </Link>
           </div>
         </div>
+        <div className="hairline-gold" />
       </header>
+
       <main className="mx-auto w-full max-w-2xl md:max-w-6xl px-4 md:px-8 py-4 md:py-8 animate-fade-in">{children}</main>
       <BottomNav />
     </div>
