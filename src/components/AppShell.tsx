@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { Home, ShoppingBag, Heart, Megaphone, MessageCircle, Wallet } from "lucide-react";
+import { Home, ShoppingBag, Heart, Megaphone, MessageCircle, Wallet, LayoutDashboard } from "lucide-react";
 import { Logo } from "./Logo";
 import { BottomNav } from "./BottomNav";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,6 +35,7 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
           <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
             {[
               { to: "/", label: "Home", icon: Home, end: true },
+              { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
               { to: "/market", label: "Market", icon: ShoppingBag },
               { to: "/community", label: "Community", icon: Megaphone },
               { to: "/dating", label: "Hookup", icon: Heart },
