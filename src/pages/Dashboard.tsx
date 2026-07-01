@@ -46,7 +46,7 @@ const Dashboard = () => {
         supabase.from("wallets").select("balance,tier").eq("user_id", user.id).maybeSingle(),
         supabase.from("listings").select("id,title,price,category,photos,created_at,views", { count: "exact" }).eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
         supabase.from("cart_items").select("id,quantity", { count: "exact", head: false }).eq("user_id", user.id),
-        supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("read", false),
+        supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("is_read", false),
         supabase.from("orders").select("id,status", { count: "exact" }).eq("buyer_id", user.id),
         supabase.from("orders").select("id", { count: "exact", head: true }).eq("seller_id", user.id),
         supabase.from("wallet_transactions").select("id,amount,type,description,created_at,balance_after").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
