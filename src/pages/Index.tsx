@@ -166,37 +166,41 @@ const Index = () => {
       </section>
 
 
-      {/* Live stats strip */}
-      <div className="grid grid-cols-3 gap-2 mb-5">
-        <Card className="p-3 text-center gradient-card">
-          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Listings</p>
-          <p className="text-lg font-extrabold">{stats.listings.toLocaleString()}</p>
-        </Card>
-        <Card className="p-3 text-center gradient-card">
-          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Members</p>
-          <p className="text-lg font-extrabold">{stats.users.toLocaleString()}</p>
-        </Card>
-        <Card className="p-3 text-center gradient-card">
-          <p className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center justify-center gap-1"><Flame className="h-3 w-3" />Today</p>
-          <p className="text-lg font-extrabold">{stats.today.toLocaleString()}</p>
-        </Card>
+      {/* Editorial stats strip */}
+      <div className="grid grid-cols-3 gap-3 mb-8">
+        {[
+          { label: "Listings", value: stats.listings },
+          { label: "Members", value: stats.users },
+          { label: "Today", value: stats.today, icon: Flame },
+        ].map(({ label, value, icon: Icon }) => (
+          <Card key={label} className="relative overflow-hidden p-4 gradient-card ring-gold">
+            <span className="kicker text-muted-foreground flex items-center gap-1">
+              {Icon && <Icon className="h-3 w-3 text-accent" />} {label}
+            </span>
+            <p className="font-serif text-3xl md:text-4xl mt-1 text-gold">{value.toLocaleString()}</p>
+          </Card>
+        ))}
       </div>
 
       {/* Trending tags */}
       {trendingTags.length > 0 && (
-        <div className="mb-5">
-          <div className="flex items-center gap-1.5 mb-2 text-sm font-semibold"><TrendingUp className="h-4 w-4 text-primary" /> Trending</div>
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp className="h-4 w-4 text-accent" />
+            <span className="kicker text-muted-foreground">In circulation</span>
+            <div className="hairline-gold flex-1" />
+          </div>
           <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1 -mx-4 px-4">
             <Badge
               variant={activeTag === null ? "default" : "secondary"}
-              className="cursor-pointer shrink-0"
+              className="cursor-pointer shrink-0 rounded-full"
               onClick={() => setActiveTag(null)}
             >All</Badge>
             {trendingTags.map(t => (
               <Badge
                 key={t}
                 variant={activeTag === t ? "default" : "secondary"}
-                className="cursor-pointer shrink-0 capitalize"
+                className="cursor-pointer shrink-0 rounded-full capitalize"
                 onClick={() => setActiveTag(activeTag === t ? null : t)}
               >#{t}</Badge>
             ))}
@@ -204,15 +208,20 @@ const Index = () => {
         </div>
       )}
 
-      {/* Featured picks */}
+      {/* Featured — magazine hero row */}
       {featured.length > 0 && !query && !activeTag && (
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold flex items-center gap-1.5"><Sparkles className="h-4 w-4 text-primary" /> Featured Picks</h2>
+        <div className="mb-10">
+          <div className="flex items-end justify-between mb-4">
+            <div>
+              <span className="kicker text-accent flex items-center gap-1"><Sparkles className="h-3 w-3" /> The Editors' Selection</span>
+              <h2 className="font-serif text-3xl md:text-4xl mt-1">Featured this week</h2>
+            </div>
+            <Link to="/market" className="hidden md:inline-flex kicker text-muted-foreground hover:text-accent items-center gap-1">Browse all <ArrowRight className="h-3 w-3" /></Link>
           </div>
-          <div className="-mx-4 flex gap-3 overflow-x-auto pb-3 px-4 snap-x snap-mandatory scrollbar-none">
+          <div className="hairline-gold mb-4" />
+          <div className="-mx-4 flex gap-4 overflow-x-auto pb-3 px-4 snap-x snap-mandatory scrollbar-none">
             {featured.map(l => (
-              <div key={l.id} className="snap-start shrink-0 w-44 sm:w-52">
+              <div key={l.id} className="snap-start shrink-0 w-48 sm:w-56 md:w-64">
                 <ListingCard listing={l} onDelete={load} />
               </div>
             ))}
@@ -220,10 +229,15 @@ const Index = () => {
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-xl font-bold">Recent Listings</h2>
-        <Link to="/market" className="text-sm text-primary flex items-center gap-1">See all <ArrowRight className="h-3 w-3" /></Link>
+      <div className="flex items-end justify-between mb-4">
+        <div>
+          <span className="kicker text-accent">Latest dispatches</span>
+          <h2 className="font-serif text-3xl md:text-4xl mt-1">Recent Listings</h2>
+        </div>
+        <Link to="/market" className="kicker text-muted-foreground hover:text-accent flex items-center gap-1">See all <ArrowRight className="h-3 w-3" /></Link>
       </div>
+      <div className="hairline-gold mb-5" />
+
 
       {filtered.length === 0 ? (
         <Card className="p-8 text-center gradient-card">
