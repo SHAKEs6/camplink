@@ -7,6 +7,11 @@ export default {
   theme: {
     container: { center: true, padding: "1.5rem", screens: { "2xl": "1400px" } },
     extend: {
+      fontFamily: {
+        serif: ['"Instrument Serif"', 'ui-serif', 'Georgia', 'serif'],
+        sans: ['"Work Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Instrument Serif"', 'ui-serif', 'Georgia', 'serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
