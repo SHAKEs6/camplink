@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { Home, ShoppingBag, Heart, Megaphone, MessageCircle, Wallet } from "lucide-react";
+import { Home, ShoppingBag, Heart, Megaphone, MessageCircle, Wallet, LayoutDashboard } from "lucide-react";
 import { Logo } from "./Logo";
 import { BottomNav } from "./BottomNav";
 import { useAuth } from "@/hooks/useAuth";
