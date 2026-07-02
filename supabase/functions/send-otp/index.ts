@@ -54,7 +54,15 @@ Deno.serve(async (req) => {
     if (!r.ok) {
       const t = await r.text();
       console.error("Twilio error", r.status, t);
-      throw new Error("Failed to send SMS: " + t.slice(0, 200));
+      let msg = "Failed to send SMS";
+      try {
+        const j = JSON.parse(t);
+        if (j.code === 21608) msg = "This number isn't verified on our SMS trial account yet. Please contact support to enable it, or try another number.";
+        else if (j.code === 21211 || j.code === 21614) msg = "That phone number looks invalid. Use full international format e.g. +2547XXXXXXXX.";
+        else if (j.code === 21610) msg = "This number has opted out of SMS.";
+        else if (j.message) msg = j.message;
+      } catch {}
+      throw new Error(msg);
     }
 
     return new Response(JSON.stringify({ ok: true }), {
