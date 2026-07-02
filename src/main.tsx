@@ -8,5 +8,8 @@ import "@fontsource/work-sans/600.css";
 import "@fontsource/work-sans/700.css";
 import App from "./App.tsx";
 import "./index.css";
+import { applyPlatformClass } from "./lib/platform";
+
+applyPlatformClass();
 
 createRoot(document.getElementById("root")!).render(<App />);
