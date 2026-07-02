@@ -110,27 +110,59 @@ const Auth = () => {
             <p className="text-sm text-muted-foreground mt-1">Your campus marketplace & community</p>
           </div>
 
-          <Tabs value={tab} onValueChange={setTab}>
-            <TabsList className="grid grid-cols-2 w-full bg-secondary/50">
+          <Tabs value={tab} onValueChange={(v) => { setTab(v); setOtpSent(false); }}>
+            <TabsList className="grid grid-cols-3 w-full bg-secondary/50">
               <TabsTrigger value="signin">Sign in</TabsTrigger>
               <TabsTrigger value="signup">Sign up</TabsTrigger>
+              <TabsTrigger value="phone">Phone</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signup" className="space-y-3 mt-4">
               <div><Label>Display name</Label><Input value={name} onChange={e => setName(e.target.value)} placeholder="Alice W." maxLength={60} /></div>
             </TabsContent>
 
-            <div className="space-y-3 mt-4">
-              <div><Label>Email</Label><Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@email.com" /></div>
-              <div><Label>Password</Label><Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="At least 8 characters" /></div>
-              <Button className="w-full gradient-accent shadow-neon hover-scale" onClick={() => handle(tab as any)} disabled={busy}>
-                {busy && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                {tab === "signin" ? "Sign in" : "Create account"}
-              </Button>
-              {tab === "signin" && (
-                <a href="/forgot-password" className="block text-center text-xs text-muted-foreground hover:text-primary">Forgot password?</a>
-              )}
-            </div>
+            {tab !== "phone" ? (
+              <div className="space-y-3 mt-4">
+                <div><Label>Email</Label><Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@email.com" /></div>
+                <div><Label>Password</Label><Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="At least 8 characters" /></div>
+                <Button className="w-full gradient-accent shadow-neon hover-scale" onClick={() => handle(tab as any)} disabled={busy}>
+                  {busy && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  {tab === "signin" ? "Sign in" : "Create account"}
+                </Button>
+                {tab === "signin" && (
+                  <a href="/forgot-password" className="block text-center text-xs text-muted-foreground hover:text-primary">Forgot password?</a>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3 mt-4">
+                <div>
+                  <Label>Phone number</Label>
+                  <Input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+2547XXXXXXXX" disabled={otpSent} />
+                  <p className="text-[11px] text-muted-foreground mt-1">Include country code, e.g. +254 for Kenya.</p>
+                </div>
+                {!otpSent ? (
+                  <Button className="w-full gradient-accent shadow-neon hover-scale" onClick={sendOtp} disabled={phoneBusy}>
+                    {phoneBusy && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    Send code
+                  </Button>
+                ) : (
+                  <>
+                    <div>
+                      <Label>6-digit code</Label>
+                      <Input inputMode="numeric" pattern="\d{6}" maxLength={6} value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, ""))} placeholder="123456" />
+                    </div>
+                    <div><Label>Display name (optional)</Label><Input value={name} onChange={e => setName(e.target.value)} placeholder="Alice W." maxLength={60} /></div>
+                    <Button className="w-full gradient-accent shadow-neon hover-scale" onClick={verifyOtp} disabled={phoneBusy}>
+                      {phoneBusy && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                      Verify & continue
+                    </Button>
+                    <button type="button" onClick={() => { setOtpSent(false); setOtp(""); }} className="block w-full text-center text-xs text-muted-foreground hover:text-primary">
+                      Change number
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </Tabs>
 
           <div className="relative my-5">
