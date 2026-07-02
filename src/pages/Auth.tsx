@@ -67,6 +67,36 @@ const Auth = () => {
     navigate("/");
   };
 
+  const sendOtp = async () => {
+    const p = phoneSchema.safeParse(phone);
+    if (!p.success) { toast.error(p.error.issues[0].message); return; }
+    setPhoneBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-otp", { body: { phone: p.data } });
+      if (error || (data as any)?.error) throw new Error((data as any)?.error || error!.message);
+      setOtpSent(true);
+      toast.success("Code sent via SMS");
+    } catch (e: any) { toast.error(e.message ?? "Failed to send code"); }
+    finally { setPhoneBusy(false); }
+  };
+
+  const verifyOtp = async () => {
+    if (!/^\d{6}$/.test(otp)) { toast.error("Enter the 6-digit code"); return; }
+    setPhoneBusy(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("verify-otp", {
+        body: { phone, code: otp, display_name: name || phone },
+      });
+      if (error || (data as any)?.error) throw new Error((data as any)?.error || error!.message);
+      const { phone: verifiedPhone, password: tempPass } = data as { phone: string; password: string };
+      const { error: signErr } = await supabase.auth.signInWithPassword({ phone: verifiedPhone, password: tempPass });
+      if (signErr) throw signErr;
+      toast.success("Phone verified! You're in.");
+      navigate("/");
+    } catch (e: any) { toast.error(e.message ?? "Verification failed"); }
+    finally { setPhoneBusy(false); }
+  };
+
   return (
     <NeonBackground>
       <div className="flex min-h-screen items-center justify-center p-4">
