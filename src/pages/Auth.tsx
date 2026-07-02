@@ -17,6 +17,7 @@ const schema = z.object({
   email: z.string().trim().email("Invalid email").max(255),
   password: z.string().min(8, "Min 8 characters").max(72),
 });
+const phoneSchema = z.string().trim().regex(/^\+[1-9]\d{7,14}$/, "Use E.164 format e.g. +2547XXXXXXXX");
 
 const Auth = () => {
   const { user, loading } = useAuth();
@@ -26,6 +27,10 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [phoneBusy, setPhoneBusy] = useState(false);
 
   useEffect(() => { document.title = "Sign in — Camplink"; }, []);
 
