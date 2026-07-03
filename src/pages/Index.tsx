@@ -15,6 +15,15 @@ import { useOnline } from "@/hooks/useOnline";
 
 const PAGE_SIZE = 30;
 
+const getGreeting = () => {
+  const h = new Date().getHours();
+  if (h < 5) return { text: "Burning the midnight oil", emoji: "🌙" };
+  if (h < 12) return { text: "Good morning", emoji: "☀️" };
+  if (h < 17) return { text: "Good afternoon", emoji: "🌤️" };
+  if (h < 21) return { text: "Good evening", emoji: "🌆" };
+  return { text: "Good night", emoji: "✨" };
+};
+
 const Index = () => {
   const { user } = useAuth();
   const online = useOnline();
@@ -26,9 +35,14 @@ const Index = () => {
   const [query, setQuery] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [stats, setStats] = useState({ listings: 0, users: 0, today: 0 });
+  const [greeting, setGreeting] = useState(getGreeting());
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { document.title = "Camplink — Campus Marketplace"; }, []);
+  useEffect(() => {
+    const id = setInterval(() => setGreeting(getGreeting()), 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   const fetchPage = useCallback(async (pageIdx: number, replace = false) => {
     if (!online) return;
@@ -126,8 +140,8 @@ const Index = () => {
         </div>
         <div className="hairline-gold my-4" />
 
-        <h1 className="relative font-serif text-white text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-tight">
-          Good evening, <em className="italic text-gold">{name || "friend"}</em>.<br />
+        <h1 className="relative font-serif text-white text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-tight ios:text-5xl">
+          {greeting.text} {greeting.emoji}, <em className="italic text-gold">{name || "friend"}</em>.<br />
           <span className="text-white/85">Your campus, curated.</span>
         </h1>
         <p className="relative mt-4 max-w-xl text-white/75 text-sm md:text-base leading-relaxed">
