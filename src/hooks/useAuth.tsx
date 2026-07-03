@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signOut = async () => { await supabase.auth.signOut(); };
+  const signOut = async () => { sessionStorage.removeItem("bio_verified_session"); await supabase.auth.signOut(); };
 
   return (
     <AuthContext.Provider value={{ user, session, loading, isAdmin, signOut }}>
