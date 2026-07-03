@@ -140,8 +140,8 @@ const Index = () => {
         </div>
         <div className="hairline-gold my-4" />
 
-        <h1 className="relative font-serif text-white text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-tight">
-          Good evening, <em className="italic text-gold">{name || "friend"}</em>.<br />
+        <h1 className="relative font-serif text-white text-4xl sm:text-5xl md:text-7xl leading-[0.95] tracking-tight ios:text-5xl">
+          {greeting.text} {greeting.emoji}, <em className="italic text-gold">{name || "friend"}</em>.<br />
           <span className="text-white/85">Your campus, curated.</span>
         </h1>
         <p className="relative mt-4 max-w-xl text-white/75 text-sm md:text-base leading-relaxed">
