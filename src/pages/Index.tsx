@@ -15,6 +15,15 @@ import { useOnline } from "@/hooks/useOnline";
 
 const PAGE_SIZE = 30;
 
+const getGreeting = () => {
+  const h = new Date().getHours();
+  if (h < 5) return { text: "Burning the midnight oil", emoji: "🌙" };
+  if (h < 12) return { text: "Good morning", emoji: "☀️" };
+  if (h < 17) return { text: "Good afternoon", emoji: "🌤️" };
+  if (h < 21) return { text: "Good evening", emoji: "🌆" };
+  return { text: "Good night", emoji: "✨" };
+};
+
 const Index = () => {
   const { user } = useAuth();
   const online = useOnline();
