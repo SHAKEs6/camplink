@@ -35,9 +35,14 @@ const Index = () => {
   const [query, setQuery] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [stats, setStats] = useState({ listings: 0, users: 0, today: 0 });
+  const [greeting, setGreeting] = useState(getGreeting());
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { document.title = "Camplink — Campus Marketplace"; }, []);
+  useEffect(() => {
+    const id = setInterval(() => setGreeting(getGreeting()), 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   const fetchPage = useCallback(async (pageIdx: number, replace = false) => {
     if (!online) return;
