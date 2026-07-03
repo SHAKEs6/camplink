@@ -193,22 +193,7 @@ const Page = ({ category, title, emoji }: { category: "marketplace" | "housing";
         </Sheet>
       </div>
 
-      {/* Quick category chips (marketplace) */}
-      {category === "marketplace" && (
-        <div className="flex gap-2 overflow-x-auto mb-3 pb-1 -mx-1 px-1 scrollbar-none">
-          {MARKET_CATS.map(c => (
-            <Button
-              key={c}
-              size="sm"
-              variant={cat === c ? "default" : "outline"}
-              className={`h-8 text-xs whitespace-nowrap rounded-full ${cat === c ? "gradient-accent" : ""}`}
-              onClick={() => setCat(c)}
-            >
-              {c}
-            </Button>
-          ))}
-        </div>
-      )}
+      {/* Quick category chips removed — use the Filters button when needed */}
 
       {/* Active filter chips */}
       {activeFilters.length > 0 && (
