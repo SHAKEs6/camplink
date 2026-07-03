@@ -168,8 +168,28 @@ html.platform-ios {
 }
 html.platform-ios body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Work Sans", sans-serif; }
 html.platform-ios button, html.platform-ios .rounded-md, html.platform-ios .rounded-lg { border-radius: 0.9rem; }
-html.platform-ios header { backdrop-filter: saturate(180%) blur(24px); -webkit-backdrop-filter: saturate(180%) blur(24px); }
+html.platform-ios header { backdrop-filter: saturate(180%) blur(24px); -webkit-backdrop-filter: saturate(180%) blur(24px); background: hsl(var(--background) / 0.72) !important; }
 html.platform-ios [role="switch"] { border-radius: 999px; }
+
+/* iOS: fancier editorial masthead + card treatment */
+html.platform-ios .gradient-hero {
+  border-radius: 1.75rem;
+  background:
+    radial-gradient(120% 80% at 0% 0%, hsl(var(--accent) / 0.28), transparent 55%),
+    radial-gradient(120% 80% at 100% 100%, hsl(var(--primary-glow) / 0.35), transparent 55%),
+    var(--gradient-hero);
+  box-shadow: 0 30px 80px -30px hsl(245 80% 30% / 0.7), inset 0 1px 0 hsl(0 0% 100% / 0.08);
+}
+html.platform-ios .gradient-hero h1 { font-family: "New York", "Instrument Serif", ui-serif, Georgia, serif; }
+html.platform-ios .kicker { letter-spacing: 0.28em; font-size: 0.62rem; }
+html.platform-ios .shadow-lux { box-shadow: 0 20px 60px -25px hsl(240 60% 2% / 0.75), inset 0 1px 0 hsl(0 0% 100% / 0.06); }
+html.platform-ios .ring-gold { box-shadow: inset 0 0 0 1px hsl(var(--accent) / 0.45), 0 8px 30px -12px hsl(240 60% 2% / 0.6); }
+html.platform-ios .rounded-2xl { border-radius: 1.75rem; }
+html.platform-ios .rounded-xl { border-radius: 1.25rem; }
+html.platform-ios input, html.platform-ios .rounded-full { -webkit-appearance: none; }
+html.platform-ios main { padding-left: 1.1rem; padding-right: 1.1rem; }
+html.platform-ios nav.fixed { backdrop-filter: saturate(180%) blur(30px); -webkit-backdrop-filter: saturate(180%) blur(30px); }
+
 
 /* Android: Material 3, bolder headings, sharper corners, ripple hint */
 html.platform-android {
