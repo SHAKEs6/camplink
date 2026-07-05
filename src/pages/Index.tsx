@@ -130,6 +130,7 @@ const Index = () => {
 
   return (
     <AppShell>
+      <AdBanner />
       {/* Magazine masthead */}
       <section className="relative mb-8 overflow-hidden rounded-2xl gradient-hero p-6 md:p-10 shadow-lux ring-gold">
         <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-primary/30 blur-3xl animate-neon-float" />
