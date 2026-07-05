@@ -29,6 +29,9 @@ const Chat = () => {
   const [gmessages, setGmessages] = useState<GMsg[]>([]);
   const [input, setInput] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
+  const activeConv = convos.find(c => c.id === activeId);
+  const otherId = activeConv?.other?.id;
+  const { unlocked: dmUnlocked, refresh: refreshUnlock } = useContactUnlock(otherId);
 
   useEffect(() => { document.title = "Chat — Camplink"; }, []);
 
