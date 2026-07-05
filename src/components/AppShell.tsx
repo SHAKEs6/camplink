@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 
 export const AppShell = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
-  const cartCount = useCartCount();
   const [avatar, setAvatar] = useState<string | null>(null);
   const initials = (user?.email ?? "U").slice(0, 2).toUpperCase();
   useEffect(() => {
