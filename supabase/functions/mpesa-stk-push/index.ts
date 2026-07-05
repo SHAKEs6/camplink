@@ -50,27 +50,60 @@ Deno.serve(async (req) => {
     const userId = claims.claims.sub as string;
 
     const body = await req.json().catch(() => ({}));
-    const { listing_id, quantity, phone } = body as { listing_id?: string; quantity?: number; phone?: string };
-    if (!listing_id || !phone) {
-      return new Response(JSON.stringify({ error: 'listing_id and phone are required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const { listing_id, quantity, phone, kind, seller_id } = body as {
+      listing_id?: string; quantity?: number; phone?: string;
+      kind?: 'purchase' | 'contact_unlock'; seller_id?: string;
+    };
+    if (!phone) {
+      return new Response(JSON.stringify({ error: 'phone is required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
     const msisdn = normalizePhone(phone);
     if (!msisdn) {
       return new Response(JSON.stringify({ error: 'Invalid Kenyan phone number' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
+    const orderKind = kind === 'contact_unlock' ? 'contact_unlock' : 'purchase';
     const qty = Math.max(1, Math.min(99, Number(quantity || 1)));
 
-    // Service role for trusted reads/writes
     const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
-    const { data: listing, error: lerr } = await admin
-      .from('listings').select('id, user_id, title, price').eq('id', listing_id).maybeSingle();
-    if (lerr || !listing) {
-      return new Response(JSON.stringify({ error: 'Listing not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+
+    let amount = 0;
+    let effectiveSellerId: string | null = null;
+    let effectiveListingId: string | null = null;
+    let refTitle = 'Camplink';
+    let accountRef = 'CAMPLINK';
+
+    if (orderKind === 'contact_unlock') {
+      const { data: settings } = await admin.from('app_settings').select('theme').eq('id', 1).maybeSingle();
+      const price = Number((settings?.theme as any)?.['contact_unlock_price'] || 0);
+      if (!price || price < 1) {
+        return new Response(JSON.stringify({ error: 'Unlock price not set. Ask an admin to configure it.' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      let sid = seller_id || null;
+      if (!sid && listing_id) {
+        const { data: l } = await admin.from('listings').select('user_id, title, id').eq('id', listing_id).maybeSingle();
+        if (!l) return new Response(JSON.stringify({ error: 'Listing not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        sid = l.user_id; effectiveListingId = l.id; refTitle = `Unlock: ${l.title}`;
+      }
+      if (!sid) return new Response(JSON.stringify({ error: 'seller_id or listing_id required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      if (sid === userId) return new Response(JSON.stringify({ error: 'Cannot unlock your own contact' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      const { data: existing } = await admin.from('contact_unlocks').select('id').eq('user_id', userId).eq('seller_id', sid).maybeSingle();
+      if (existing) return new Response(JSON.stringify({ error: 'Already unlocked' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      effectiveSellerId = sid;
+      amount = Math.round(price);
+      accountRef = `UNL-${sid.slice(0, 8)}`;
+      if (refTitle === 'Camplink') refTitle = 'Contact unlock';
+    } else {
+      if (!listing_id) return new Response(JSON.stringify({ error: 'listing_id required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      const { data: listing, error: lerr } = await admin
+        .from('listings').select('id, user_id, title, price').eq('id', listing_id).maybeSingle();
+      if (lerr || !listing) return new Response(JSON.stringify({ error: 'Listing not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      if (listing.user_id === userId) return new Response(JSON.stringify({ error: 'You cannot buy your own listing' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      amount = Math.max(1, Math.round(Number(listing.price) * qty));
+      effectiveSellerId = listing.user_id;
+      effectiveListingId = listing.id;
+      refTitle = listing.title || 'Camplink purchase';
+      accountRef = `LST-${listing.id.slice(0, 8)}`;
     }
-    if (listing.user_id === userId) {
-      return new Response(JSON.stringify({ error: 'You cannot buy your own listing' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-    const amount = Math.max(1, Math.round(Number(listing.price) * qty));
 
     const shortcode = Deno.env.get('MPESA_SHORTCODE')!;
     const passkey = Deno.env.get('MPESA_PASSKEY')!;
@@ -92,8 +125,8 @@ Deno.serve(async (req) => {
         PartyB: shortcode,
         PhoneNumber: msisdn,
         CallBackURL: callbackUrl,
-        AccountReference: `LST-${listing.id.slice(0, 8)}`,
-        TransactionDesc: (listing.title || 'Camplink purchase').slice(0, 60),
+        AccountReference: accountRef,
+        TransactionDesc: refTitle.slice(0, 60),
       }),
     });
     const stk = await stkRes.json();
@@ -102,13 +135,14 @@ Deno.serve(async (req) => {
     }
 
     const { data: order, error: oerr } = await admin.from('orders').insert({
-      listing_id: listing.id,
+      listing_id: effectiveListingId,
       buyer_id: userId,
-      seller_id: listing.user_id,
+      seller_id: effectiveSellerId,
       quantity: qty,
       amount,
       phone: msisdn,
       status: 'pending',
+      kind: orderKind,
       checkout_request_id: stk.CheckoutRequestID,
       merchant_request_id: stk.MerchantRequestID,
     }).select('id').single();
