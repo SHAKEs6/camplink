@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Send, ArrowLeft, Trash2, Users, MessageCircle } from "lucide-react";
+import { Send, ArrowLeft, Trash2, Users, MessageCircle, Lock } from "lucide-react";
 import { toast } from "sonner";
+import { useContactUnlock } from "@/hooks/useContactUnlock";
+import { ContactUnlockDialog } from "@/components/ContactUnlockDialog";
 
 type Conv = { id: string; user_a: string; user_b: string; last_message_at: string; other?: { id: string; display_name: string | null } };
 type Msg = { id: string; conversation_id: string; sender_id: string; content: string; created_at: string };
