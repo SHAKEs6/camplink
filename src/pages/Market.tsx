@@ -16,6 +16,7 @@ import { Search, SlidersHorizontal, MapPin, X, ArrowUpDown } from "lucide-react"
 import { cacheGet, cacheSet } from "@/lib/offlineCache";
 import { useOnline } from "@/hooks/useOnline";
 import { SUBCATEGORIES } from "@/components/AddListingDialog";
+import { AdBanner } from "@/components/AdBanner";
 
 const MARKET_CATS = ["All", ...SUBCATEGORIES.filter(s => s !== "Housing")] as const;
 type SortKey = "newest" | "price_asc" | "price_desc" | "title";
