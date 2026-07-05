@@ -134,10 +134,9 @@ const Chat = () => {
   };
 
   if (activeId) {
-    const conv = convos.find(c => c.id === activeId);
-    const otherId = conv?.other?.id;
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { unlocked, refresh } = useContactUnlock(otherId);
+    const conv = activeConv;
+    const unlocked = dmUnlocked;
+    const refresh = refreshUnlock;
     return (
       <AppShell>
         <div className="flex items-center gap-3 mb-3">
