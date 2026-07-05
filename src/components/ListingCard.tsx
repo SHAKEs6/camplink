@@ -2,13 +2,14 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Phone, Mail, MapPin, MessageCircle, Trash2, ShoppingCart, Play, Images } from "lucide-react";
+import { Phone, Mail, MapPin, MessageCircle, Trash2, Play, Images, Lock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { PhotoLightbox } from "./PhotoLightbox";
 import { ListingReviewsDialog } from "./ListingReviewsDialog";
-import { MpesaPayDialog } from "./MpesaPayDialog";
+import { ContactUnlockDialog } from "./ContactUnlockDialog";
+import { useContactUnlock } from "@/hooks/useContactUnlock";
 
 export type Listing = {
   id: string;
@@ -32,12 +33,15 @@ const emoji = (c: string) => (c === "housing" ? "🏠" : "🛒");
 export const ListingCard = ({ listing, onDelete }: { listing: Listing; onDelete?: () => void }) => {
   const { user, isAdmin } = useAuth();
   const canDelete = user && (user.id === listing.user_id || isAdmin);
+  const isOwn = user?.id === listing.user_id;
   const [lightbox, setLightbox] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const allPhotos = (listing.photos && listing.photos.length ? listing.photos : (listing.image_url ? [listing.image_url] : []));
+  const { unlocked, refresh } = useContactUnlock(listing.user_id);
+  const canSeeContact = isOwn || unlocked;
 
   const startChat = async () => {
-    if (!user || user.id === listing.user_id) return;
+    if (!user || isOwn) return;
     const [a, b] = [user.id, listing.user_id].sort();
     const { data: existing } = await supabase.from("conversations").select("id").eq("user_a", a).eq("user_b", b).maybeSingle();
     let convoId = existing?.id;
@@ -55,16 +59,6 @@ export const ListingCard = ({ listing, onDelete }: { listing: Listing; onDelete?
     if (error) { toast.error(error.message); return; }
     toast.success("Deleted");
     onDelete?.();
-  };
-
-  const addToCart = async () => {
-    if (!user) return;
-    const { error } = await supabase.from("cart_items").upsert(
-      { user_id: user.id, listing_id: listing.id, quantity: 1 },
-      { onConflict: "user_id,listing_id" }
-    );
-    if (error) { toast.error(error.message); return; }
-    toast.success("Added to cart");
   };
 
   return (
@@ -101,13 +95,30 @@ export const ListingCard = ({ listing, onDelete }: { listing: Listing; onDelete?
         <p className="text-primary font-bold">KSh {Number(listing.price).toLocaleString()}</p>
         {listing.location && <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" />{listing.location}</p>}
         {listing.description && <p className="text-xs text-muted-foreground line-clamp-2">{listing.description}</p>}
+
         <div className="flex flex-wrap gap-1.5 pt-1">
-          {listing.contact_phone && <Button size="sm" variant="outline" className="h-7 text-[11px]" asChild><a href={`tel:${listing.contact_phone}`}><Phone className="h-3 w-3 mr-1" />Call</a></Button>}
-          {listing.contact_email && <Button size="sm" variant="outline" className="h-7 text-[11px]" asChild><a href={`mailto:${listing.contact_email}`}><Mail className="h-3 w-3 mr-1" />Email</a></Button>}
-          {user && user.id !== listing.user_id && <Button size="sm" className="h-7 text-[11px] gradient-accent" onClick={startChat}><MessageCircle className="h-3 w-3 mr-1" />Chat</Button>}
-          {user && user.id !== listing.user_id && <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={addToCart}><ShoppingCart className="h-3 w-3 mr-1" />Cart</Button>}
-          {user && user.id !== listing.user_id && Number(listing.price) > 0 && (
-            <MpesaPayDialog listingId={listing.id} price={Number(listing.price)} title={listing.title} />
+          {!isOwn && !canSeeContact && user && (
+            <ContactUnlockDialog sellerId={listing.user_id} listingId={listing.id} sellerName={listing.title} onUnlocked={refresh} />
+          )}
+          {canSeeContact && listing.contact_phone && (
+            <Button size="sm" variant="outline" className="h-7 text-[11px]" asChild>
+              <a href={`tel:${listing.contact_phone}`}><Phone className="h-3 w-3 mr-1" />Call</a>
+            </Button>
+          )}
+          {canSeeContact && listing.contact_email && (
+            <Button size="sm" variant="outline" className="h-7 text-[11px]" asChild>
+              <a href={`mailto:${listing.contact_email}`}><Mail className="h-3 w-3 mr-1" />Email</a>
+            </Button>
+          )}
+          {canSeeContact && !isOwn && (
+            <Button size="sm" className="h-7 text-[11px] gradient-accent" onClick={startChat}>
+              <MessageCircle className="h-3 w-3 mr-1" />Chat
+            </Button>
+          )}
+          {!isOwn && !canSeeContact && (
+            <Badge variant="outline" className="h-7 text-[10px] flex items-center gap-1 px-2">
+              <Lock className="h-3 w-3" /> Contact locked
+            </Badge>
           )}
           <ListingReviewsDialog listingId={listing.id} />
           {canDelete && <Button size="sm" variant="ghost" className="h-7 text-[11px] text-destructive" onClick={remove}><Trash2 className="h-3 w-3" /></Button>}
