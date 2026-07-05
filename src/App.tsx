@@ -14,7 +14,7 @@ import Reviews from "./pages/Reviews.tsx";
 import Chat from "./pages/Chat.tsx";
 import Profile from "./pages/Profile.tsx";
 import Admin from "./pages/Admin.tsx";
-import Cart from "./pages/Cart.tsx";
+
 import Dating from "./pages/Dating.tsx";
 import DatingEdit from "./pages/DatingEdit.tsx";
 import Community from "./pages/Community.tsx";
@@ -49,7 +49,7 @@ const App = () => (
             <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
             <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-            <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+            
             <Route path="/dating" element={<ProtectedRoute><Dating /></ProtectedRoute>} />
             <Route path="/dating/edit" element={<ProtectedRoute><DatingEdit /></ProtectedRoute>} />
             <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />

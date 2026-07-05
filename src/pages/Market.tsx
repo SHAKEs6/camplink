@@ -16,6 +16,7 @@ import { Search, SlidersHorizontal, MapPin, X, ArrowUpDown } from "lucide-react"
 import { cacheGet, cacheSet } from "@/lib/offlineCache";
 import { useOnline } from "@/hooks/useOnline";
 import { SUBCATEGORIES } from "@/components/AddListingDialog";
+import { AdBanner } from "@/components/AdBanner";
 
 const MARKET_CATS = ["All", ...SUBCATEGORIES.filter(s => s !== "Housing")] as const;
 type SortKey = "newest" | "price_asc" | "price_desc" | "title";
@@ -103,6 +104,7 @@ const Page = ({ category, title, emoji }: { category: "marketplace" | "housing";
         <AddListingDialog defaultCategory={category} onCreated={load} />
       </div>
       <div className="hairline-gold mb-4" />
+      <AdBanner />
 
       {/* Search + filters row */}
       <div className="flex items-center gap-2 mb-3">

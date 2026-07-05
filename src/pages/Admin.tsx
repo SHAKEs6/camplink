@@ -9,11 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash2, Shield, Send, Ban, CheckCircle2, MessageCircle, Wallet as WalletIcon, Film, Users } from "lucide-react";
+import { Trash2, Shield, Send, Ban, CheckCircle2, MessageCircle, Wallet as WalletIcon, Film, Users, Megaphone } from "lucide-react";
 import { ThemeEditor } from "@/components/ThemeEditor";
 import { WalletAdmin } from "@/components/admin/WalletAdmin";
 import { ReelsAdmin } from "@/components/admin/ReelsAdmin";
 import { GroupChatAdmin } from "@/components/admin/GroupChatAdmin";
+import { AdsAdmin } from "@/components/admin/AdsAdmin";
 import { toast } from "sonner";
 
 type Row = Record<string, any>;
@@ -107,15 +108,17 @@ const Admin = () => {
       </Card>
 
       <Tabs defaultValue="users">
-        <TabsList className="grid grid-cols-6 w-full">
+        <TabsList className="grid grid-cols-7 w-full">
           <TabsTrigger value="users">Users ({users.length})</TabsTrigger>
           <TabsTrigger value="listings">Listings ({listings.length})</TabsTrigger>
           <TabsTrigger value="reviews">Reviews ({reviews.length})</TabsTrigger>
+          <TabsTrigger value="ads"><Megaphone className="h-3 w-3 mr-1" />Ads</TabsTrigger>
           <TabsTrigger value="wallet"><WalletIcon className="h-3 w-3 mr-1" />Wallet</TabsTrigger>
           <TabsTrigger value="reels"><Film className="h-3 w-3 mr-1" />Reels</TabsTrigger>
           <TabsTrigger value="groups"><Users className="h-3 w-3 mr-1" />Groups</TabsTrigger>
         </TabsList>
 
+        <TabsContent value="ads" className="mt-3"><AdsAdmin /></TabsContent>
         <TabsContent value="wallet" className="mt-3"><WalletAdmin /></TabsContent>
         <TabsContent value="reels" className="mt-3"><ReelsAdmin /></TabsContent>
         <TabsContent value="groups" className="mt-3"><GroupChatAdmin /></TabsContent>

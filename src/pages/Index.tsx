@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cacheGet, cacheSet } from "@/lib/offlineCache";
 import { useOnline } from "@/hooks/useOnline";
+import { AdBanner } from "@/components/AdBanner";
 
 const PAGE_SIZE = 30;
 
@@ -129,6 +130,7 @@ const Index = () => {
 
   return (
     <AppShell>
+      <AdBanner />
       {/* Magazine masthead */}
       <section className="relative mb-8 overflow-hidden rounded-2xl gradient-hero p-6 md:p-10 shadow-lux ring-gold">
         <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-primary/30 blur-3xl animate-neon-float" />
