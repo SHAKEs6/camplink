@@ -10,10 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { NotificationBell } from "./NotificationBell";
 import { OfflineBanner } from "./OfflineBanner";
 import { DownloadAppButton } from "./DownloadAppButton";
-import { useCartCount } from "@/hooks/useCartCount";
-import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 export const AppShell = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
