@@ -14,7 +14,7 @@ import Reviews from "./pages/Reviews.tsx";
 import Chat from "./pages/Chat.tsx";
 import Profile from "./pages/Profile.tsx";
 import Admin from "./pages/Admin.tsx";
-import Cart from "./pages/Cart.tsx";
+
 import Dating from "./pages/Dating.tsx";
 import DatingEdit from "./pages/DatingEdit.tsx";
 import Community from "./pages/Community.tsx";
