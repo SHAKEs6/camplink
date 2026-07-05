@@ -104,6 +104,7 @@ const Page = ({ category, title, emoji }: { category: "marketplace" | "housing";
         <AddListingDialog defaultCategory={category} onCreated={load} />
       </div>
       <div className="hairline-gold mb-4" />
+      <AdBanner />
 
       {/* Search + filters row */}
       <div className="flex items-center gap-2 mb-3">
