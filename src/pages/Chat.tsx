@@ -132,6 +132,9 @@ const Chat = () => {
 
   if (activeId) {
     const conv = convos.find(c => c.id === activeId);
+    const otherId = conv?.other?.id;
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const { unlocked, refresh } = useContactUnlock(otherId);
     return (
       <AppShell>
         <div className="flex items-center gap-3 mb-3">
@@ -142,7 +145,15 @@ const Chat = () => {
         </div>
         <Card className="gradient-card h-[60vh] flex flex-col">
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
-            {messages.map(m => (
+            {!unlocked && otherId && (
+              <div className="rounded-lg border border-dashed border-primary/30 bg-primary/5 p-4 text-center space-y-2">
+                <Lock className="h-6 w-6 mx-auto text-primary" />
+                <p className="text-sm font-semibold">Chat is locked</p>
+                <p className="text-xs text-muted-foreground">Unlock this user's contact to send and read messages.</p>
+                <ContactUnlockDialog sellerId={otherId} sellerName={conv?.other?.display_name ?? undefined} onUnlocked={refresh} />
+              </div>
+            )}
+            {unlocked && messages.map(m => (
               <div key={m.id} className={`group flex items-center gap-1 ${m.sender_id === user?.id ? "justify-end" : "justify-start"}`}>
                 {m.sender_id === user?.id && (
                   <button onClick={() => deleteMessage(m.id)} className="opacity-0 group-hover:opacity-100 transition-opacity text-destructive p-1" title="Delete"><Trash2 className="h-3 w-3" /></button>
@@ -153,8 +164,14 @@ const Chat = () => {
             <div ref={endRef} />
           </div>
           <div className="p-2 border-t border-border flex gap-2">
-            <Input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === "Enter" && send()} placeholder="Type a message…" />
-            <Button onClick={send} className="gradient-accent" size="icon"><Send className="h-4 w-4" /></Button>
+            <Input
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && send()}
+              placeholder={unlocked ? "Type a message…" : "Unlock to chat"}
+              disabled={!unlocked}
+            />
+            <Button onClick={send} className="gradient-accent" size="icon" disabled={!unlocked}><Send className="h-4 w-4" /></Button>
           </div>
         </Card>
       </AppShell>
