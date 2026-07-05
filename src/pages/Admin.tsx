@@ -108,15 +108,17 @@ const Admin = () => {
       </Card>
 
       <Tabs defaultValue="users">
-        <TabsList className="grid grid-cols-6 w-full">
+        <TabsList className="grid grid-cols-7 w-full">
           <TabsTrigger value="users">Users ({users.length})</TabsTrigger>
           <TabsTrigger value="listings">Listings ({listings.length})</TabsTrigger>
           <TabsTrigger value="reviews">Reviews ({reviews.length})</TabsTrigger>
+          <TabsTrigger value="ads"><Megaphone className="h-3 w-3 mr-1" />Ads</TabsTrigger>
           <TabsTrigger value="wallet"><WalletIcon className="h-3 w-3 mr-1" />Wallet</TabsTrigger>
           <TabsTrigger value="reels"><Film className="h-3 w-3 mr-1" />Reels</TabsTrigger>
           <TabsTrigger value="groups"><Users className="h-3 w-3 mr-1" />Groups</TabsTrigger>
         </TabsList>
 
+        <TabsContent value="ads" className="mt-3"><AdsAdmin /></TabsContent>
         <TabsContent value="wallet" className="mt-3"><WalletAdmin /></TabsContent>
         <TabsContent value="reels" className="mt-3"><ReelsAdmin /></TabsContent>
         <TabsContent value="groups" className="mt-3"><GroupChatAdmin /></TabsContent>
