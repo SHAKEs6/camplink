@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cacheGet, cacheSet } from "@/lib/offlineCache";
 import { useOnline } from "@/hooks/useOnline";
+import { AdBanner } from "@/components/AdBanner";
 
 const PAGE_SIZE = 30;
 
