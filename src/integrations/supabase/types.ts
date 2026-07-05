@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      ads: {
+        Row: {
+          active: boolean
+          body: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          image_url: string | null
+          link_url: string | null
+          priority: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          body?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_url?: string | null
+          link_url?: string | null
+          priority?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          body?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          image_url?: string | null
+          link_url?: string | null
+          priority?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       anon_responses: {
         Row: {
           comment: string | null
@@ -217,6 +256,51 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      contact_unlocks: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          listing_id: string | null
+          order_id: string | null
+          seller_id: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          listing_id?: string | null
+          order_id?: string | null
+          seller_id: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          listing_id?: string | null
+          order_id?: string | null
+          seller_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_unlocks_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_unlocks_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       conversations: {
         Row: {
@@ -523,6 +607,7 @@ export type Database = {
           checkout_request_id: string | null
           created_at: string
           id: string
+          kind: string
           listing_id: string | null
           merchant_request_id: string | null
           mpesa_receipt: string | null
@@ -541,6 +626,7 @@ export type Database = {
           checkout_request_id?: string | null
           created_at?: string
           id?: string
+          kind?: string
           listing_id?: string | null
           merchant_request_id?: string | null
           mpesa_receipt?: string | null
@@ -559,6 +645,7 @@ export type Database = {
           checkout_request_id?: string | null
           created_at?: string
           id?: string
+          kind?: string
           listing_id?: string | null
           merchant_request_id?: string | null
           mpesa_receipt?: string | null
