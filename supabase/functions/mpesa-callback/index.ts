@@ -26,25 +26,39 @@ Deno.serve(async (req) => {
     const { data: order } = await admin.from('orders')
       .update({ status, result_code: resultCode, result_desc: resultDesc, mpesa_receipt: receipt, raw_callback: body })
       .eq('checkout_request_id', checkoutId)
-      .select('id, buyer_id, seller_id, amount, listing_id')
+      .select('id, buyer_id, seller_id, amount, listing_id, kind')
       .maybeSingle();
 
     if (order) {
-      const title = status === 'paid' ? '✅ Payment received' : status === 'cancelled' ? '⚠️ Payment cancelled' : '❌ Payment failed';
+      const isUnlock = order.kind === 'contact_unlock';
+      const title = status === 'paid'
+        ? (isUnlock ? '🔓 Contact unlocked' : '✅ Payment received')
+        : status === 'cancelled' ? '⚠️ Payment cancelled' : '❌ Payment failed';
       const desc = status === 'paid'
         ? `KSh ${order.amount.toLocaleString()} confirmed${receipt ? ` (${receipt})` : ''}`
         : resultDesc;
-      const notifs = [
-        { user_id: order.buyer_id, title, body: desc, type: 'payment', link: '/cart' },
+      const link = isUnlock ? '/market' : '/wallet';
+      const notifs: any[] = [
+        { user_id: order.buyer_id, title, body: desc, type: 'payment', link },
       ];
       if (order.seller_id && status === 'paid') {
-        notifs.push({ user_id: order.seller_id, title: '💰 New sale', body: `You received KSh ${order.amount.toLocaleString()}${receipt ? ` (${receipt})` : ''}`, type: 'payment', link: '/cart' });
+        notifs.push({
+          user_id: order.seller_id,
+          title: isUnlock ? '👀 Someone unlocked your contact' : '💰 New sale',
+          body: isUnlock ? `A buyer paid KSh ${order.amount.toLocaleString()} to reach you.` : `You received KSh ${order.amount.toLocaleString()}${receipt ? ` (${receipt})` : ''}`,
+          type: 'payment', link,
+        });
       }
       await admin.from('notifications').insert(notifs);
 
-      // Clear cart item if paid
-      if (status === 'paid' && order.listing_id) {
-        await admin.from('cart_items').delete().eq('user_id', order.buyer_id).eq('listing_id', order.listing_id);
+      if (status === 'paid' && isUnlock && order.seller_id) {
+        await admin.from('contact_unlocks').insert({
+          user_id: order.buyer_id,
+          seller_id: order.seller_id,
+          listing_id: order.listing_id,
+          amount: order.amount,
+          order_id: order.id,
+        }).select();
       }
     }
 
