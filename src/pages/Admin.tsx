@@ -94,6 +94,14 @@ const Admin = () => {
     navigate(`/chat?c=${cid}`);
   };
 
+  const toggleContactAccess = async (u: Row) => {
+    const next = !u.contact_access;
+    const { error } = await supabase.from("profiles").update({ contact_access: next } as any).eq("id", u.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success(next ? "Granted contact access" : "Revoked contact access");
+    load();
+  };
+
   return (
     <AppShell>
       <div className="flex items-center gap-2 mb-4"><Shield className="h-6 w-6 text-accent" /><h1 className="text-2xl font-extrabold">Admin Panel</h1></div>
