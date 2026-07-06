@@ -100,10 +100,26 @@ export const AdsAdmin = () => {
         <p className="font-semibold text-sm flex items-center gap-2"><Megaphone className="h-4 w-4" />New banner ad</p>
         <div><Label className="text-xs">Title</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></div>
         <div><Label className="text-xs">Body (optional)</Label><Textarea rows={2} value={form.body} onChange={e => setForm({ ...form, body: e.target.value })} /></div>
-        <div className="grid grid-cols-2 gap-2">
-          <div><Label className="text-xs">Image URL</Label><Input value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })} placeholder="https://…" /></div>
-          <div><Label className="text-xs">Link URL</Label><Input value={form.link_url} onChange={e => setForm({ ...form, link_url: e.target.value })} placeholder="https://…" /></div>
+        <div>
+          <Label className="text-xs">Image</Label>
+          {form.image_url ? (
+            <div className="relative">
+              <img src={form.image_url} alt="" className="w-full h-32 object-cover rounded-lg border border-border" />
+              <Button type="button" size="icon" variant="destructive" className="absolute top-2 right-2 h-7 w-7" onClick={() => setForm({ ...form, image_url: "" })}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex gap-2 items-stretch">
+              <Input value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })} placeholder="Paste URL…" className="flex-1" />
+              <label className="inline-flex items-center gap-1 px-3 rounded-md border border-border cursor-pointer hover:bg-secondary/30 text-xs shrink-0">
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Upload className="h-4 w-4" /> Upload</>}
+                <input type="file" accept="image/*" className="hidden" onChange={handleFile} disabled={uploading} />
+              </label>
+            </div>
+          )}
         </div>
+        <div><Label className="text-xs">Link URL</Label><Input value={form.link_url} onChange={e => setForm({ ...form, link_url: e.target.value })} placeholder="https://…" /></div>
         <div><Label className="text-xs">Priority (higher = shown first)</Label><Input type="number" value={form.priority} onChange={e => setForm({ ...form, priority: Number(e.target.value) })} /></div>
         <Button className="gradient-accent w-full" onClick={create} disabled={creating}>Add ad</Button>
       </Card>
