@@ -6,17 +6,36 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Trash2, Megaphone, Save, DollarSign } from "lucide-react";
+import { Trash2, Megaphone, Save, DollarSign, Upload, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 type Ad = { id: string; title: string; body: string | null; image_url: string | null; link_url: string | null; active: boolean; priority: number; created_at: string };
 
 export const AdsAdmin = () => {
+  const { user } = useAuth();
   const [ads, setAds] = useState<Ad[]>([]);
   const [price, setPrice] = useState<string>("");
   const [savingPrice, setSavingPrice] = useState(false);
   const [form, setForm] = useState({ title: "", body: "", image_url: "", link_url: "", priority: 0 });
   const [creating, setCreating] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB"); return; }
+    setUploading(true);
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `ads/${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("listing-photos").upload(path, file, { cacheControl: "3600", upsert: false });
+    if (error) { toast.error(error.message); setUploading(false); return; }
+    const { data } = supabase.storage.from("listing-photos").getPublicUrl(path);
+    setForm(f => ({ ...f, image_url: data.publicUrl }));
+    setUploading(false);
+    e.target.value = "";
+    toast.success("Image uploaded");
+  };
 
   const load = async () => {
     const { data } = await supabase.from("ads").select("*").order("priority", { ascending: false }).order("created_at", { ascending: false });
