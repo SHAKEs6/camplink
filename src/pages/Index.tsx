@@ -258,7 +258,7 @@ const Index = () => {
       {filtered.length === 0 ? (
         <Card className="p-8 text-center gradient-card">
           <p className="text-muted-foreground mb-3">{recent.length === 0 ? "No listings yet — be the first!" : "No matches for your search."}</p>
-          {recent.length === 0 && <AddListingDialog onCreated={load} />}
+          {recent.length === 0 && user && <AddListingDialog onCreated={load} />}
         </Card>
       ) : (
         <>
