@@ -284,9 +284,15 @@ const Index = () => {
         </>
       )}
 
-      <div className="fixed bottom-24 right-4 z-40">
-        <AddListingDialog onCreated={load} trigger={<Button size="lg" className="rounded-full h-14 w-14 p-0 gradient-accent shadow-glow"><span className="text-2xl leading-none">+</span></Button>} />
-      </div>
+      {user ? (
+        <div className="fixed bottom-24 right-4 z-40">
+          <AddListingDialog onCreated={load} trigger={<Button size="lg" className="rounded-full h-14 w-14 p-0 gradient-accent shadow-glow"><span className="text-2xl leading-none">+</span></Button>} />
+        </div>
+      ) : (
+        <div className="fixed bottom-24 right-4 z-40">
+          <Link to="/auth"><Button size="lg" className="rounded-full gradient-accent shadow-glow">Sign up / Log in</Button></Link>
+        </div>
+      )}
     </AppShell>
   );
 };
