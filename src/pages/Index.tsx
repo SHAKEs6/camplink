@@ -258,7 +258,7 @@ const Index = () => {
       {filtered.length === 0 ? (
         <Card className="p-8 text-center gradient-card">
           <p className="text-muted-foreground mb-3">{recent.length === 0 ? "No listings yet — be the first!" : "No matches for your search."}</p>
-          {recent.length === 0 && <AddListingDialog onCreated={load} />}
+          {recent.length === 0 && user && <AddListingDialog onCreated={load} />}
         </Card>
       ) : (
         <>
@@ -284,9 +284,15 @@ const Index = () => {
         </>
       )}
 
-      <div className="fixed bottom-24 right-4 z-40">
-        <AddListingDialog onCreated={load} trigger={<Button size="lg" className="rounded-full h-14 w-14 p-0 gradient-accent shadow-glow"><span className="text-2xl leading-none">+</span></Button>} />
-      </div>
+      {user ? (
+        <div className="fixed bottom-24 right-4 z-40">
+          <AddListingDialog onCreated={load} trigger={<Button size="lg" className="rounded-full h-14 w-14 p-0 gradient-accent shadow-glow"><span className="text-2xl leading-none">+</span></Button>} />
+        </div>
+      ) : (
+        <div className="fixed bottom-24 right-4 z-40">
+          <Link to="/auth"><Button size="lg" className="rounded-full gradient-accent shadow-glow">Sign up / Log in</Button></Link>
+        </div>
+      )}
     </AppShell>
   );
 };

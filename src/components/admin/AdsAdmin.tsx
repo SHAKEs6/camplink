@@ -6,17 +6,36 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Trash2, Megaphone, Save, DollarSign } from "lucide-react";
+import { Trash2, Megaphone, Save, DollarSign, Upload, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 type Ad = { id: string; title: string; body: string | null; image_url: string | null; link_url: string | null; active: boolean; priority: number; created_at: string };
 
 export const AdsAdmin = () => {
+  const { user } = useAuth();
   const [ads, setAds] = useState<Ad[]>([]);
   const [price, setPrice] = useState<string>("");
   const [savingPrice, setSavingPrice] = useState(false);
   const [form, setForm] = useState({ title: "", body: "", image_url: "", link_url: "", priority: 0 });
   const [creating, setCreating] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB"); return; }
+    setUploading(true);
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `ads/${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("listing-photos").upload(path, file, { cacheControl: "3600", upsert: false });
+    if (error) { toast.error(error.message); setUploading(false); return; }
+    const { data } = supabase.storage.from("listing-photos").getPublicUrl(path);
+    setForm(f => ({ ...f, image_url: data.publicUrl }));
+    setUploading(false);
+    e.target.value = "";
+    toast.success("Image uploaded");
+  };
 
   const load = async () => {
     const { data } = await supabase.from("ads").select("*").order("priority", { ascending: false }).order("created_at", { ascending: false });
@@ -81,10 +100,26 @@ export const AdsAdmin = () => {
         <p className="font-semibold text-sm flex items-center gap-2"><Megaphone className="h-4 w-4" />New banner ad</p>
         <div><Label className="text-xs">Title</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></div>
         <div><Label className="text-xs">Body (optional)</Label><Textarea rows={2} value={form.body} onChange={e => setForm({ ...form, body: e.target.value })} /></div>
-        <div className="grid grid-cols-2 gap-2">
-          <div><Label className="text-xs">Image URL</Label><Input value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })} placeholder="https://…" /></div>
-          <div><Label className="text-xs">Link URL</Label><Input value={form.link_url} onChange={e => setForm({ ...form, link_url: e.target.value })} placeholder="https://…" /></div>
+        <div>
+          <Label className="text-xs">Image</Label>
+          {form.image_url ? (
+            <div className="relative">
+              <img src={form.image_url} alt="" className="w-full h-32 object-cover rounded-lg border border-border" />
+              <Button type="button" size="icon" variant="destructive" className="absolute top-2 right-2 h-7 w-7" onClick={() => setForm({ ...form, image_url: "" })}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex gap-2 items-stretch">
+              <Input value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })} placeholder="Paste URL…" className="flex-1" />
+              <label className="inline-flex items-center gap-1 px-3 rounded-md border border-border cursor-pointer hover:bg-secondary/30 text-xs shrink-0">
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Upload className="h-4 w-4" /> Upload</>}
+                <input type="file" accept="image/*" className="hidden" onChange={handleFile} disabled={uploading} />
+              </label>
+            </div>
+          )}
         </div>
+        <div><Label className="text-xs">Link URL</Label><Input value={form.link_url} onChange={e => setForm({ ...form, link_url: e.target.value })} placeholder="https://…" /></div>
         <div><Label className="text-xs">Priority (higher = shown first)</Label><Input type="number" value={form.priority} onChange={e => setForm({ ...form, priority: Number(e.target.value) })} /></div>
         <Button className="gradient-accent w-full" onClick={create} disabled={creating}>Add ad</Button>
       </Card>
