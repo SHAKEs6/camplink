@@ -10,6 +10,8 @@ export function useContactUnlock(sellerId?: string | null) {
   const check = useCallback(async () => {
     if (!user || !sellerId || user.id === sellerId) { setUnlocked(user?.id === sellerId); return; }
     setLoading(true);
+    const { data: prof } = await supabase.from("profiles").select("contact_access").eq("id", user.id).maybeSingle();
+    if ((prof as any)?.contact_access) { setUnlocked(true); setLoading(false); return; }
     const { data } = await supabase.from("contact_unlocks").select("id")
       .eq("user_id", user.id).eq("seller_id", sellerId).maybeSingle();
     setUnlocked(!!data);

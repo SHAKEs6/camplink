@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash2, Shield, Send, Ban, CheckCircle2, MessageCircle, Wallet as WalletIcon, Film, Users, Megaphone } from "lucide-react";
+import { Trash2, Shield, Send, Ban, CheckCircle2, MessageCircle, Wallet as WalletIcon, Film, Users, Megaphone, Unlock, Lock } from "lucide-react";
 import { ThemeEditor } from "@/components/ThemeEditor";
 import { WalletAdmin } from "@/components/admin/WalletAdmin";
 import { ReelsAdmin } from "@/components/admin/ReelsAdmin";
@@ -133,13 +133,17 @@ const Admin = () => {
                   {u.phone && <p className="text-xs text-muted-foreground">{u.phone}</p>}
                 </div>
               </div>
-              <div className="flex gap-1 mt-2">
+              <div className="flex flex-wrap gap-1 mt-2">
                 <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" onClick={() => dmUser(u)} disabled={u.id === user?.id}>
                   <MessageCircle className="h-3 w-3 mr-1" />DM
                 </Button>
                 <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" onClick={() => toggleSuspend(u)} disabled={u.id === user?.id}>
                   {u.suspended ? <CheckCircle2 className="h-3 w-3 mr-1" /> : <Ban className="h-3 w-3 mr-1" />}
                   {u.suspended ? "Unsuspend" : "Suspend"}
+                </Button>
+                <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" onClick={() => toggleContactAccess(u)}>
+                  {u.contact_access ? <Lock className="h-3 w-3 mr-1" /> : <Unlock className="h-3 w-3 mr-1" />}
+                  {u.contact_access ? "Revoke contacts" : "Grant contacts"}
                 </Button>
                 <Button size="sm" variant="outline" className="flex-1 h-8 text-xs text-destructive" onClick={() => removeUser(u)} disabled={u.id === user?.id}>
                   <Trash2 className="h-3 w-3 mr-1" />Delete
