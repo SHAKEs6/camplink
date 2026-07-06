@@ -20,10 +20,11 @@ export function useContactUnlock(sellerId?: string | null) {
 
   useEffect(() => {
     if (!user || !sellerId) return;
-    const ch = supabase.channel(`unlock-${sellerId}`).on("postgres_changes",
-      { event: "INSERT", schema: "public", table: "contact_unlocks", filter: `user_id=eq.${user.id}` },
-      () => check()
-    ).subscribe();
+    const ch = supabase.channel(`unlock-${user.id}-${sellerId}-${Math.random().toString(36).slice(2,8)}`)
+      .on("postgres_changes",
+        { event: "INSERT", schema: "public", table: "contact_unlocks", filter: `user_id=eq.${user.id}` },
+        () => check()
+      ).subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [user, sellerId, check]);
 
