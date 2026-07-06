@@ -33,6 +33,7 @@ const emoji = (c: string) => (c === "housing" ? "🏠" : "🛒");
 
 export const ListingCard = ({ listing, onDelete }: { listing: Listing; onDelete?: () => void }) => {
   const { user, isAdmin } = useAuth();
+  const navigate = useNavigate();
   const canDelete = user && (user.id === listing.user_id || isAdmin);
   const isOwn = user?.id === listing.user_id;
   const [lightbox, setLightbox] = useState(false);
@@ -40,6 +41,7 @@ export const ListingCard = ({ listing, onDelete }: { listing: Listing; onDelete?
   const allPhotos = (listing.photos && listing.photos.length ? listing.photos : (listing.image_url ? [listing.image_url] : []));
   const { unlocked, refresh } = useContactUnlock(listing.user_id);
   const canSeeContact = isOwn || unlocked;
+  const requireAuth = () => { navigate("/auth"); };
 
   const startChat = async () => {
     if (!user || isOwn) return;
@@ -67,7 +69,7 @@ export const ListingCard = ({ listing, onDelete }: { listing: Listing; onDelete?
       <button
         type="button"
         className="aspect-[4/3] bg-secondary/40 grid place-items-center text-6xl w-full relative"
-        onClick={() => allPhotos.length ? setLightbox(true) : (listing.video_url && setShowVideo(true))}
+        onClick={() => !user ? requireAuth() : (allPhotos.length ? setLightbox(true) : (listing.video_url && setShowVideo(true)))}
       >
         {allPhotos.length ? (
           <img src={allPhotos[0]} alt={listing.title} className="w-full h-full object-cover" />
@@ -98,30 +100,35 @@ export const ListingCard = ({ listing, onDelete }: { listing: Listing; onDelete?
         {listing.description && <p className="text-xs text-muted-foreground line-clamp-2">{listing.description}</p>}
 
         <div className="flex flex-wrap gap-1.5 pt-1">
-          {!isOwn && !canSeeContact && user && (
+          {!user && (
+            <Button size="sm" className="h-7 text-[11px] gradient-accent w-full" onClick={requireAuth}>
+              <LogIn className="h-3 w-3 mr-1" />Sign up to view
+            </Button>
+          )}
+          {user && !isOwn && !canSeeContact && (
             <ContactUnlockDialog sellerId={listing.user_id} listingId={listing.id} sellerName={listing.title} onUnlocked={refresh} />
           )}
-          {canSeeContact && listing.contact_phone && (
+          {user && canSeeContact && listing.contact_phone && (
             <Button size="sm" variant="outline" className="h-7 text-[11px]" asChild>
               <a href={`tel:${listing.contact_phone}`}><Phone className="h-3 w-3 mr-1" />Call</a>
             </Button>
           )}
-          {canSeeContact && listing.contact_email && (
+          {user && canSeeContact && listing.contact_email && (
             <Button size="sm" variant="outline" className="h-7 text-[11px]" asChild>
               <a href={`mailto:${listing.contact_email}`}><Mail className="h-3 w-3 mr-1" />Email</a>
             </Button>
           )}
-          {canSeeContact && !isOwn && (
+          {user && canSeeContact && !isOwn && (
             <Button size="sm" className="h-7 text-[11px] gradient-accent" onClick={startChat}>
               <MessageCircle className="h-3 w-3 mr-1" />Chat
             </Button>
           )}
-          {!isOwn && !canSeeContact && (
+          {user && !isOwn && !canSeeContact && (
             <Badge variant="outline" className="h-7 text-[10px] flex items-center gap-1 px-2">
               <Lock className="h-3 w-3" /> Contact locked
             </Badge>
           )}
-          <ListingReviewsDialog listingId={listing.id} />
+          {user && <ListingReviewsDialog listingId={listing.id} />}
           {canDelete && <Button size="sm" variant="ghost" className="h-7 text-[11px] text-destructive" onClick={remove}><Trash2 className="h-3 w-3" /></Button>}
         </div>
       </div>
