@@ -84,7 +84,7 @@ export const ListingCard = ({ listing, onDelete }: { listing: Listing; onDelete?
         {listing.video_url && (
           <span
             className="absolute bottom-1 right-1 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full flex items-center gap-1"
-            onClick={(e) => { e.stopPropagation(); setShowVideo(true); }}
+            onClick={(e) => { e.stopPropagation(); if (!user) { requireAuth(); return; } setShowVideo(true); }}
           >
             <Play className="h-3 w-3" /> video
           </span>
