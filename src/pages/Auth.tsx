@@ -67,13 +67,22 @@ const Auth = () => {
     navigate("/");
   };
 
+  const fnError = async (error: any, data: any) => {
+    if ((data as any)?.error) return (data as any).error as string;
+    try {
+      const body = await (error?.context as Response)?.clone?.().json?.();
+      if (body?.error) return body.error as string;
+    } catch { /* ignore */ }
+    return error?.message ?? "Request failed";
+  };
+
   const sendOtp = async () => {
     const p = phoneSchema.safeParse(phone);
     if (!p.success) { toast.error(p.error.issues[0].message); return; }
     setPhoneBusy(true);
     try {
       const { data, error } = await supabase.functions.invoke("send-otp", { body: { phone: p.data } });
-      if (error || (data as any)?.error) throw new Error((data as any)?.error || error!.message);
+      if (error || (data as any)?.error) throw new Error(await fnError(error, data));
       setOtpSent(true);
       toast.success("Code sent via SMS");
     } catch (e: any) { toast.error(e.message ?? "Failed to send code"); }
@@ -87,7 +96,7 @@ const Auth = () => {
       const { data, error } = await supabase.functions.invoke("verify-otp", {
         body: { phone, code: otp, display_name: name || phone },
       });
-      if (error || (data as any)?.error) throw new Error((data as any)?.error || error!.message);
+      if (error || (data as any)?.error) throw new Error(await fnError(error, data));
       const { phone: verifiedPhone, password: tempPass } = data as { phone: string; password: string };
       const { error: signErr } = await supabase.auth.signInWithPassword({ phone: verifiedPhone, password: tempPass });
       if (signErr) throw signErr;
@@ -96,6 +105,7 @@ const Auth = () => {
     } catch (e: any) { toast.error(e.message ?? "Verification failed"); }
     finally { setPhoneBusy(false); }
   };
+
 
   return (
     <NeonBackground>
