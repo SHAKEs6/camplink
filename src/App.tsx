@@ -22,6 +22,7 @@ import Anon from "./pages/Anon.tsx";
 import Wallet from "./pages/Wallet.tsx";
 import Reels from "./pages/Reels.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
+import PaypalReturn from "./pages/PaypalReturn.tsx";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { RealtimeNotificationPopup } from "./components/RealtimeNotificationPopup";
 import { MusicPlayer } from "./components/MusicPlayer";
@@ -56,7 +57,9 @@ const App = () => (
             <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
             <Route path="/reels" element={<ProtectedRoute><Reels /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/paypal/return" element={<ProtectedRoute><PaypalReturn /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
           <RealtimeNotificationPopup />

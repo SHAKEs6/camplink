@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Wallet as WalletIcon, Gift, Send, Ticket, Users, Trophy, History, Sparkles, Copy } from "lucide-react";
 import { toast } from "sonner";
+import { PayPalButton } from "@/components/PayPalButton";
 
 type Tx = { id: string; amount: number; type: string; description: string | null; balance_after: number; created_at: string };
 type Campaign = { id: string; title: string; description: string | null; amount: number; expires_at: string | null };
@@ -33,6 +34,7 @@ const Wallet = () => {
   const [sendAmt, setSendAmt] = useState("");
   const [busy, setBusy] = useState(false);
   const [dailyClaimed, setDailyClaimed] = useState(false);
+  const [topup, setTopup] = useState("");
 
   useEffect(() => { document.title = "Wallet — Camplink"; }, []);
 
@@ -174,6 +176,21 @@ const Wallet = () => {
         </TabsContent>
 
         <TabsContent value="redeem" className="space-y-3 mt-3">
+          <Card className="gradient-card p-4 space-y-2">
+            <p className="font-semibold text-sm flex items-center gap-1"><Sparkles className="h-4 w-4" /> Top up with PayPal</p>
+            <p className="text-xs text-muted-foreground">Buy points instantly — KSh 1 = 1 point. Credited the moment PayPal confirms.</p>
+            <div className="space-y-2">
+              <Label htmlFor="topup-amt" className="text-xs">Amount (KSh)</Label>
+              <Input id="topup-amt" inputMode="numeric" value={topup} onChange={e => setTopup(e.target.value.replace(/\D/g, ""))} placeholder="e.g. 500" />
+              <div className="flex gap-1.5 flex-wrap">
+                {[100, 500, 1000, 5000].map(v => (
+                  <Button key={v} size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => setTopup(String(v))}>KSh {v.toLocaleString()}</Button>
+                ))}
+              </div>
+              <PayPalButton kind="wallet_topup" amount={Number(topup) || 0} disabled={Number(topup) < 10}
+                label={`Top up${Number(topup) >= 10 ? ` KSh ${Number(topup).toLocaleString()}` : ""} with PayPal`} />
+            </div>
+          </Card>
           <Card className="gradient-card p-4 space-y-2">
             <p className="font-semibold text-sm flex items-center gap-1"><Ticket className="h-4 w-4" /> Promo code</p>
             <div className="flex gap-2">

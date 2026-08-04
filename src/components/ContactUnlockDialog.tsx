@@ -7,6 +7,7 @@ import { Loader2, Smartphone, CheckCircle2, Clock, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useUnlockPrice } from "@/hooks/useContactUnlock";
+import { PayPalButton } from "@/components/PayPalButton";
 
 type Props = {
   sellerId: string;
@@ -116,6 +117,12 @@ export const ContactUnlockDialog = ({ sellerId, listingId, sellerName, onUnlocke
               <Button className="w-full gradient-accent" onClick={pay} disabled={!phone || price < 1}>
                 <Smartphone className="h-4 w-4 mr-2" />Send STK push
               </Button>
+              <div className="flex items-center gap-2">
+                <div className="h-px flex-1 bg-border" />
+                <span className="text-[10px] text-muted-foreground">or</span>
+                <div className="h-px flex-1 bg-border" />
+              </div>
+              <PayPalButton kind="contact_unlock" sellerId={sellerId} listingId={listingId} disabled={price < 1} />
               {price < 1 && <p className="text-xs text-muted-foreground text-center">Admin hasn't set an unlock price yet.</p>}
             </>
           ) : status === "pushing" ? (
@@ -134,7 +141,7 @@ export const ContactUnlockDialog = ({ sellerId, listingId, sellerName, onUnlocke
             </div>
           ) : null}
 
-          <p className="text-[10px] text-muted-foreground text-center">Powered by Safaricom Daraja</p>
+          <p className="text-[10px] text-muted-foreground text-center">Secured by Safaricom Daraja &amp; PayPal</p>
         </div>
       </DialogContent>
     </Dialog>

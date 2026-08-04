@@ -17,6 +17,7 @@ export const AdsAdmin = () => {
   const [ads, setAds] = useState<Ad[]>([]);
   const [price, setPrice] = useState<string>("");
   const [savingPrice, setSavingPrice] = useState(false);
+  const [usdRate, setUsdRate] = useState<string>("");
   const [form, setForm] = useState({ title: "", body: "", image_url: "", link_url: "", priority: 0 });
   const [creating, setCreating] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -43,6 +44,8 @@ export const AdsAdmin = () => {
     const { data: s } = await supabase.from("app_settings").select("theme").eq("id", 1).maybeSingle();
     const p = Number((s?.theme as any)?.["contact_unlock_price"] || 0);
     setPrice(p ? String(p) : "");
+    const r = Number((s?.theme as any)?.["usd_rate"] || 0);
+    setUsdRate(r ? String(r) : "130");
   };
   useEffect(() => { load(); }, []);
 
@@ -54,6 +57,16 @@ export const AdsAdmin = () => {
     const { error } = await supabase.from("app_settings").upsert({ id: 1, theme });
     setSavingPrice(false);
     if (error) toast.error(error.message); else toast.success(`Unlock price set to KSh ${val}`);
+  };
+
+  const saveRate = async () => {
+    setSavingPrice(true);
+    const val = Math.max(1, Number(usdRate) || 130);
+    const { data: existing } = await supabase.from("app_settings").select("theme").eq("id", 1).maybeSingle();
+    const theme = { ...(existing?.theme as any || {}), ["usd_rate"]: val };
+    const { error } = await supabase.from("app_settings").upsert({ id: 1, theme });
+    setSavingPrice(false);
+    if (error) toast.error(error.message); else toast.success(`PayPal rate set to KSh ${val} per USD`);
   };
 
   const create = async () => {
@@ -93,6 +106,15 @@ export const AdsAdmin = () => {
         <div className="flex gap-2">
           <Input type="number" min={0} value={price} onChange={e => setPrice(e.target.value)} placeholder="e.g. 50" />
           <Button className="gradient-accent" onClick={savePrice} disabled={savingPrice}><Save className="h-4 w-4 mr-1" />Save</Button>
+        </div>
+      </Card>
+
+      <Card className="gradient-card p-4 space-y-2">
+        <p className="font-semibold text-sm flex items-center gap-2"><DollarSign className="h-4 w-4" />PayPal exchange rate</p>
+        <p className="text-xs text-muted-foreground">KSh per 1 USD. Used to convert prices when a buyer pays with PayPal.</p>
+        <div className="flex gap-2">
+          <Input type="number" min={1} value={usdRate} onChange={e => setUsdRate(e.target.value)} placeholder="130" />
+          <Button className="gradient-accent" onClick={saveRate} disabled={savingPrice}><Save className="h-4 w-4 mr-1" />Save</Button>
         </div>
       </Card>
 
