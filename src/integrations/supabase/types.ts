@@ -603,6 +603,7 @@ export type Database = {
       orders: {
         Row: {
           amount: number
+          amount_usd: number | null
           buyer_id: string
           checkout_request_id: string | null
           created_at: string
@@ -611,7 +612,9 @@ export type Database = {
           listing_id: string | null
           merchant_request_id: string | null
           mpesa_receipt: string | null
-          phone: string
+          paypal_order_id: string | null
+          phone: string | null
+          provider: string
           quantity: number
           raw_callback: Json | null
           result_code: number | null
@@ -622,6 +625,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          amount_usd?: number | null
           buyer_id: string
           checkout_request_id?: string | null
           created_at?: string
@@ -630,7 +634,9 @@ export type Database = {
           listing_id?: string | null
           merchant_request_id?: string | null
           mpesa_receipt?: string | null
-          phone: string
+          paypal_order_id?: string | null
+          phone?: string | null
+          provider?: string
           quantity?: number
           raw_callback?: Json | null
           result_code?: number | null
@@ -641,6 +647,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          amount_usd?: number | null
           buyer_id?: string
           checkout_request_id?: string | null
           created_at?: string
@@ -649,7 +656,9 @@ export type Database = {
           listing_id?: string | null
           merchant_request_id?: string | null
           mpesa_receipt?: string | null
-          phone?: string
+          paypal_order_id?: string | null
+          phone?: string | null
+          provider?: string
           quantity?: number
           raw_callback?: Json | null
           result_code?: number | null
