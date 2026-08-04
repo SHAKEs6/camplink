@@ -57,7 +57,9 @@ const App = () => (
             <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
             <Route path="/reels" element={<ProtectedRoute><Reels /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/paypal/return" element={<ProtectedRoute><PaypalReturn /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
           <RealtimeNotificationPopup />
