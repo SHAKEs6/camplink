@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Smartphone, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { PayPalButton } from "@/components/PayPalButton";
 
 type Props = {
   listingId: string;
@@ -122,6 +123,12 @@ export const MpesaPayDialog = ({ listingId, price, title, quantity = 1, trigger 
               <Button className="w-full gradient-accent" onClick={pay} disabled={!phone}>
                 <Smartphone className="h-4 w-4 mr-2" />Send STK push
               </Button>
+              <div className="flex items-center gap-2">
+                <div className="h-px flex-1 bg-border" />
+                <span className="text-[10px] text-muted-foreground">or</span>
+                <div className="h-px flex-1 bg-border" />
+              </div>
+              <PayPalButton kind="purchase" listingId={listingId} quantity={quantity} />
             </>
           ) : status === "pushing" ? (
             <div className="text-center py-6"><Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" /><p className="mt-2 text-sm">Sending request…</p></div>
@@ -140,7 +147,7 @@ export const MpesaPayDialog = ({ listingId, price, title, quantity = 1, trigger 
             </div>
           ) : null}
 
-          <p className="text-[10px] text-muted-foreground text-center">Powered by Safaricom Daraja</p>
+          <p className="text-[10px] text-muted-foreground text-center">Secured by Safaricom Daraja &amp; PayPal</p>
         </div>
       </DialogContent>
     </Dialog>
