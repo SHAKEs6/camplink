@@ -22,6 +22,7 @@ import Anon from "./pages/Anon.tsx";
 import Wallet from "./pages/Wallet.tsx";
 import Reels from "./pages/Reels.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
+import PaypalReturn from "./pages/PaypalReturn.tsx";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { RealtimeNotificationPopup } from "./components/RealtimeNotificationPopup";
 import { MusicPlayer } from "./components/MusicPlayer";
