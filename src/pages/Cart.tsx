@@ -9,8 +9,8 @@ import { Listing } from "@/components/ListingCard";
 import { toast } from "sonner";
 import { cacheGet, cacheSet } from "@/lib/offlineCache";
 import { useOnline } from "@/hooks/useOnline";
-import { MpesaPayDialog } from "@/components/MpesaPayDialog";
-import { Smartphone } from "lucide-react";
+import { BuyDialog } from "@/components/BuyDialog";
+import { ShoppingBag } from "lucide-react";
 
 type CartRow = { id: string; quantity: number; listing_id: string; listings: Listing | null };
 
@@ -121,10 +121,10 @@ const Cart = () => {
               <span className="text-sm text-muted-foreground">Total</span>
               <span className="text-xl font-extrabold text-primary">KSh {total.toLocaleString()}</span>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-2">Pay each item below with M-Pesa. Items clear from your cart once payment is confirmed.</p>
+            <p className="text-[11px] text-muted-foreground mt-2">Pay for each item below with PayPal.</p>
             <div className="space-y-2 mt-3">
               {items.filter(i => i.listings).map((row) => (
-                <MpesaPayDialog
+                <BuyDialog
                   key={row.id}
                   listingId={row.listings!.id}
                   price={Number(row.listings!.price)}
@@ -132,7 +132,7 @@ const Cart = () => {
                   quantity={row.quantity}
                   trigger={
                     <Button className="w-full gradient-accent justify-between" size="sm">
-                      <span className="flex items-center gap-2"><Smartphone className="h-4 w-4" />Pay {row.quantity}× {row.listings!.title.slice(0, 24)}</span>
+                      <span className="flex items-center gap-2"><ShoppingBag className="h-4 w-4" />Pay {row.quantity}× {row.listings!.title.slice(0, 24)}</span>
                       <span className="font-bold">KSh {(Number(row.listings!.price) * row.quantity).toLocaleString()}</span>
                     </Button>
                   }
