@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,13 +61,14 @@ const Auth = () => {
 
   const oauth = async (provider: "google" | "apple") => {
     try {
-      const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin });
-      if (result.error) {
-        toast.error((result.error as any)?.message || "Sign in failed");
-        return;
-      }
-      if (result.redirected) return;
-      navigate("/");
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/`,
+          queryParams: provider === "google" ? { prompt: "select_account" } : undefined,
+        },
+      });
+      if (error) throw error;
     } catch (e: any) {
       toast.error(e?.message || "Sign in failed");
     }
