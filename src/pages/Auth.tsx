@@ -61,11 +61,19 @@ const Auth = () => {
   };
 
   const oauth = async (provider: "google" | "apple") => {
-    const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin });
-    if (result.error) { toast.error("Sign in failed"); return; }
-    if (result.redirected) return;
-    navigate("/");
+    try {
+      const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin });
+      if (result.error) {
+        toast.error((result.error as any)?.message || "Sign in failed");
+        return;
+      }
+      if (result.redirected) return;
+      navigate("/");
+    } catch (e: any) {
+      toast.error(e?.message || "Sign in failed");
+    }
   };
+
 
   const fnError = async (error: any, data: any) => {
     if ((data as any)?.error) return (data as any).error as string;

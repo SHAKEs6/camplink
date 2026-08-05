@@ -11,6 +11,7 @@ import { PhotoLightbox } from "./PhotoLightbox";
 import { ListingReviewsDialog } from "./ListingReviewsDialog";
 import { ContactUnlockDialog } from "./ContactUnlockDialog";
 import { useContactUnlock } from "@/hooks/useContactUnlock";
+import { BuyDialog } from "./BuyDialog";
 
 export type Listing = {
   id: string;
@@ -127,6 +128,9 @@ export const ListingCard = ({ listing, onDelete }: { listing: Listing; onDelete?
             <Badge variant="outline" className="h-7 text-[10px] flex items-center gap-1 px-2">
               <Lock className="h-3 w-3" /> Contact locked
             </Badge>
+          )}
+          {user && !isOwn && (
+            <BuyDialog listingId={listing.id} price={Number(listing.price)} title={listing.title} />
           )}
           {user && <ListingReviewsDialog listingId={listing.id} />}
           {canDelete && <Button size="sm" variant="ghost" className="h-7 text-[11px] text-destructive" onClick={remove}><Trash2 className="h-3 w-3" /></Button>}
