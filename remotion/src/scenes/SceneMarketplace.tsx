@@ -45,7 +45,6 @@ export const SceneMarketplace = () => {
                 display: "flex",
                 alignItems: "center",
                 gap: 12,
-                backdropFilter: "blur(8px)",
               }}
             >
               <span style={{ fontSize: 40 }}>{item.emoji}</span>
