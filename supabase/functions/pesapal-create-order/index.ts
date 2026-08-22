@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
     }
 
     const { data: profile } = await admin.from('profiles')
-      .select('full_name, phone').eq('id', userId).maybeSingle();
+      .select('display_name, phone').eq('id', userId).maybeSingle();
 
     const { data: order, error: oerr } = await admin.from('orders').insert({
       listing_id: listingId,
@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
       return json({ error: 'Could not register PesaPal notifications' }, 400);
     }
 
-    const nameParts = String((profile as any)?.full_name || 'Camplink User').trim().split(/\s+/);
+    const nameParts = String((profile as any)?.display_name || 'Camplink User').trim().split(/\s+/);
 
     const res = await pesapalFetch('/Transactions/SubmitOrderRequest', {
       method: 'POST',
