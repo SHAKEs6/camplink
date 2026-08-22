@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from "@/components/ui/button";
 import { ShoppingBag } from "lucide-react";
 import { PayPalButton } from "@/components/PayPalButton";
+import { PesapalButton } from "@/components/PesapalButton";
 
 type Props = {
   listingId: string;
@@ -37,9 +38,10 @@ export const BuyDialog = ({ listingId, price, title, quantity = 1, trigger }: Pr
             <span className="text-xl font-extrabold text-primary">KSh {total.toLocaleString()}</span>
           </div>
 
+          <PesapalButton kind="purchase" listingId={listingId} quantity={quantity} label="M-Pesa / Card" />
           <PayPalButton kind="purchase" listingId={listingId} quantity={quantity} label="Pay with PayPal" />
 
-          <p className="text-[10px] text-muted-foreground text-center">Secure checkout powered by PayPal</p>
+          <p className="text-[10px] text-muted-foreground text-center">Secure checkout powered by PesaPal & PayPal</p>
         </div>
       </DialogContent>
     </Dialog>
