@@ -613,6 +613,7 @@ export type Database = {
           merchant_request_id: string | null
           mpesa_receipt: string | null
           paypal_order_id: string | null
+          pesapal_tracking_id: string | null
           phone: string | null
           provider: string
           quantity: number
@@ -635,6 +636,7 @@ export type Database = {
           merchant_request_id?: string | null
           mpesa_receipt?: string | null
           paypal_order_id?: string | null
+          pesapal_tracking_id?: string | null
           phone?: string | null
           provider?: string
           quantity?: number
@@ -657,6 +659,7 @@ export type Database = {
           merchant_request_id?: string | null
           mpesa_receipt?: string | null
           paypal_order_id?: string | null
+          pesapal_tracking_id?: string | null
           phone?: string | null
           provider?: string
           quantity?: number

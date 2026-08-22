@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
 import { useUnlockPrice } from "@/hooks/useContactUnlock";
 import { PayPalButton } from "@/components/PayPalButton";
+import { PesapalButton } from "@/components/PesapalButton";
 
 type Props = {
   sellerId: string;
@@ -40,10 +41,11 @@ export const ContactUnlockDialog = ({ sellerId, listingId, sellerName, trigger }
             <span className="text-xl font-extrabold text-primary">KSh {price.toLocaleString()}</span>
           </div>
 
+          <PesapalButton kind="contact_unlock" sellerId={sellerId} listingId={listingId} disabled={price < 1} label="M-Pesa / Card" />
           <PayPalButton kind="contact_unlock" sellerId={sellerId} listingId={listingId} disabled={price < 1} />
           {price < 1 && <p className="text-xs text-muted-foreground text-center">Admin hasn't set an unlock price yet.</p>}
 
-          <p className="text-[10px] text-muted-foreground text-center">Secure checkout powered by PayPal</p>
+          <p className="text-[10px] text-muted-foreground text-center">Secure checkout powered by PesaPal & PayPal</p>
         </div>
       </DialogContent>
     </Dialog>
