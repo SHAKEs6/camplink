@@ -37,11 +37,11 @@ const PaypalReturn = () => {
       if (errMsg) { setStatus("failed"); setMsg(errMsg); return; }
       const s = (data as any)?.status;
       setKind((data as any)?.kind || "");
-      if (s === "paid") { setStatus("paid"); setMsg((data as any)?.receipt ? `Receipt: ${(data as any).receipt}` : ""); }
+      if (s === "paid") { setStatus("paid"); setMsg((data as any)?.receipt ? `Receipt: ${(data as any).receipt}` : ""); setTimeout(() => navigate("/", { replace: true }), 1800); }
       else if (s === "cancelled") { setStatus("cancelled"); setMsg("You cancelled the payment."); }
       else { setStatus("failed"); setMsg((data as any)?.error || "Payment failed."); }
     })();
-  }, [params]);
+  }, [params, navigate]);
 
   return (
     <AppShell>
@@ -59,7 +59,7 @@ const PaypalReturn = () => {
               <CheckCircle2 className="h-12 w-12 mx-auto text-green-500" />
               <p className="text-lg font-semibold">Payment successful</p>
               {msg && <p className="text-xs text-muted-foreground">{msg}</p>}
-              <Button className="w-full gradient-accent" onClick={() => navigate(kind === "wallet_topup" ? "/wallet" : "/market")}>
+              <Button className="w-full gradient-accent" onClick={() => navigate("/")}>
                 Continue
               </Button>
             </>
@@ -69,7 +69,7 @@ const PaypalReturn = () => {
               <XCircle className="h-12 w-12 mx-auto text-destructive" />
               <p className="text-lg font-semibold">{status === "cancelled" ? "Payment cancelled" : "Payment failed"}</p>
               {msg && <p className="text-xs text-muted-foreground">{msg}</p>}
-              <Button variant="outline" className="w-full" onClick={() => navigate("/market")}>Back to marketplace</Button>
+              <Button variant="outline" className="w-full" onClick={() => navigate("/")}>Back to home</Button>
             </>
           )}
         </Card>
