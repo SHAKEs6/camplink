@@ -30,6 +30,7 @@ const Auth = () => {
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [phoneBusy, setPhoneBusy] = useState(false);
+  const [emailLinkSent, setEmailLinkSent] = useState(false);
 
   useEffect(() => { document.title = "Sign in — Camplink"; }, []);
 
@@ -57,6 +58,20 @@ const Auth = () => {
     } catch (e: any) {
       toast.error(e.message ?? "Authentication failed");
     } finally { setBusy(false); }
+  };
+
+  const sendEmailLink = async () => {
+    const parsed = z.string().trim().email("Invalid email").max(255).safeParse(email);
+    if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
+    setBusy(true);
+    const { error } = await supabase.auth.signInWithOtp({
+      email: parsed.data,
+      options: { emailRedirectTo: `${window.location.origin}/auth` },
+    });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    setEmailLinkSent(true);
+    toast.success("Check your email for a secure sign-in link");
   };
 
   const oauth = async (provider: "google" | "apple") => {
@@ -128,18 +143,31 @@ const Auth = () => {
             <p className="text-sm text-muted-foreground mt-1">Your campus marketplace & community</p>
           </div>
 
-          <Tabs value={tab} onValueChange={(v) => { setTab(v); setOtpSent(false); }}>
-            <TabsList className="grid grid-cols-3 w-full bg-secondary/50">
+          <Tabs value={tab} onValueChange={(v) => { setTab(v); setOtpSent(false); setEmailLinkSent(false); }}>
+            <TabsList className="grid grid-cols-4 w-full bg-secondary/50">
               <TabsTrigger value="signin">Sign in</TabsTrigger>
               <TabsTrigger value="signup">Sign up</TabsTrigger>
               <TabsTrigger value="phone">Phone</TabsTrigger>
+              <TabsTrigger value="email">Email link</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signup" className="space-y-3 mt-4">
               <div><Label>Display name</Label><Input value={name} onChange={e => setName(e.target.value)} placeholder="Alice W." maxLength={60} /></div>
             </TabsContent>
 
-            {tab !== "phone" ? (
+            {tab === "email" ? (
+              <div className="space-y-3 mt-4">
+                <div><Label>Email address</Label><Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@email.com" disabled={emailLinkSent} /></div>
+                {emailLinkSent ? (
+                  <div className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-center text-sm">A secure sign-in link was sent. Open it on this device to continue.</div>
+                ) : (
+                  <Button className="w-full gradient-accent shadow-neon hover-scale" onClick={sendEmailLink} disabled={busy}>
+                    {busy && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}Send secure sign-in link
+                  </Button>
+                )}
+                {emailLinkSent && <button type="button" onClick={() => setEmailLinkSent(false)} className="block w-full text-center text-xs text-muted-foreground hover:text-primary">Use a different email</button>}
+              </div>
+            ) : tab !== "phone" ? (
               <div className="space-y-3 mt-4">
                 <div><Label>Email</Label><Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@email.com" /></div>
                 <div><Label>Password</Label><Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="At least 8 characters" /></div>
