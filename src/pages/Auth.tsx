@@ -71,6 +71,8 @@ const Auth = () => {
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     setEmailLinkSent(true);
+    sessionStorage.setItem("camplink_email_link_pending", String(Date.now()));
+    sessionStorage.setItem("camplink_email_link_address", parsed.data.toLowerCase());
     toast.success("Check your email for a secure sign-in link");
   };
 

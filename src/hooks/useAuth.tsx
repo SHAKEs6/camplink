@@ -15,6 +15,14 @@ const AuthContext = createContext<AuthContextValue>({
   user: null, session: null, loading: true, isAdmin: false, sessionExpired: false, signOut: async () => {},
 });
 
+const emailLinkBypassIsActive = (activeUser: User) => {
+  const pending = Number(sessionStorage.getItem("camplink_email_link_pending") || 0);
+  const pendingEmail = sessionStorage.getItem("camplink_email_link_address") || "";
+  const today = new Date();
+  const expires = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).getTime();
+  return pending > 0 && pending < expires && new Date(pending).toDateString() === today.toDateString() && activeUser.email?.toLowerCase() === pendingEmail;
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -29,10 +37,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     ]);
     const admin = !!role;
     setIsAdmin(admin);
-    if (!admin && profile?.approved !== true && !activeUser.email_confirmed_at) {
+    const emailLinkBypass = emailLinkBypassIsActive(activeUser);
+    if (!admin && profile?.approved !== true && !activeUser.email_confirmed_at && !emailLinkBypass) {
       setSessionExpired(true);
       await supabase.auth.signOut();
       return false;
+    }
+    if (emailLinkBypass) {
+      sessionStorage.removeItem("camplink_email_link_pending");
+      sessionStorage.removeItem("camplink_email_link_address");
     }
     return true;
   };
