@@ -97,11 +97,11 @@ export async function fulfilOrder(admin: any, orderId: string, receipt: string |
       type: 'payment', link: '/market',
     });
   } else if (order.kind === 'wallet_topup') {
-    await admin.rpc('wallet_credit', {
+    await admin.rpc('wallet_cash_credit', {
       _uid: order.buyer_id,
       _amount: Number(order.amount),
       _type: 'topup',
-      _desc: 'PesaPal top-up',
+      _desc: 'PesaPal money top-up (KSh)',
       _ref: order.id,
     });
   } else if (order.seller_id) {

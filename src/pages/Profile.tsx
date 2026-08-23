@@ -20,7 +20,7 @@ const Profile = () => {
   const [phone, setPhone] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
   const [suspended, setSuspended] = useState(false);
-  const [wallet, setWallet] = useState<{ balance: number; tier: string } | null>(null);
+  const [wallet, setWallet] = useState<{ balance: number; cash: number; tier: string } | null>(null);
 
   const [mobileNotify, setMobileNotify] = useState(isMobileNotifyEnabled());
   useEffect(() => { document.title = "Profile — Camplink"; }, []);
@@ -34,11 +34,11 @@ const Profile = () => {
         setAvatar(data?.avatar_url ?? null);
         setSuspended(!!data?.suspended);
       });
-    supabase.from("wallets").select("balance,tier").eq("user_id", user.id).maybeSingle()
-      .then(({ data }) => { if (data) setWallet({ balance: Number(data.balance) || 0, tier: data.tier }); });
+    supabase.from("wallets").select("*").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => { if (data) setWallet({ balance: Number(data.balance) || 0, cash: Number((data as any).cash_balance) || 0, tier: data.tier }); });
     const ch = supabase.channel(`wallet-profile-${user.id}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "wallets", filter: `user_id=eq.${user.id}` },
-        (p: any) => p.new && setWallet({ balance: Number(p.new.balance) || 0, tier: p.new.tier }))
+        (p: any) => p.new && setWallet({ balance: Number(p.new.balance) || 0, cash: Number(p.new.cash_balance) || 0, tier: p.new.tier }))
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [user]);
@@ -94,7 +94,7 @@ const Profile = () => {
             <div className="min-w-0">
               <p className="font-semibold text-sm">My Wallet</p>
               <p className="text-xs text-muted-foreground">
-                {wallet ? `${wallet.balance.toLocaleString()} pts · ${wallet.tier}` : "View balance & rewards"}
+                {wallet ? `KSh ${wallet.cash.toLocaleString()} · ${wallet.balance.toLocaleString()} pts · ${wallet.tier}` : "View balance & rewards"}
               </p>
             </div>
           </div>

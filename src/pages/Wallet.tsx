@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { PesapalButton } from "@/components/PesapalButton";
 import { PayPalButton } from "@/components/PayPalButton";
 
-type Tx = { id: string; amount: number; type: string; description: string | null; balance_after: number; created_at: string };
+type Tx = { id: string; amount: number; type: string; description: string | null; balance_after: number; created_at: string; is_cash?: boolean };
 type Campaign = { id: string; title: string; description: string | null; amount: number; expires_at: string | null };
 
 const TIERS: Record<string, { label: string; min: number; color: string }> = {
@@ -25,6 +25,7 @@ const TIERS: Record<string, { label: string; min: number; color: string }> = {
 const Wallet = () => {
   const { user } = useAuth();
   const [balance, setBalance] = useState(0);
+  const [cash, setCash] = useState(0);
   const [tier, setTier] = useState("bronze");
   const [frozen, setFrozen] = useState(false);
   const [txs, setTxs] = useState<Tx[]>([]);
@@ -33,6 +34,8 @@ const Wallet = () => {
   const [promo, setPromo] = useState("");
   const [sendTo, setSendTo] = useState("");
   const [sendAmt, setSendAmt] = useState("");
+  const [cashTo, setCashTo] = useState("");
+  const [cashAmt, setCashAmt] = useState("");
   const [busy, setBusy] = useState(false);
   const [dailyClaimed, setDailyClaimed] = useState(false);
   const [topup, setTopup] = useState("");
@@ -49,7 +52,7 @@ const Wallet = () => {
       supabase.from("campaign_claims").select("campaign_id").eq("user_id", user.id),
       supabase.from("daily_bonus_claims").select("id").eq("user_id", user.id).eq("claim_date", today).maybeSingle(),
     ]);
-    if (w) { setBalance(w.balance); setTier(w.tier); setFrozen(w.frozen); }
+    if (w) { setBalance(w.balance); setCash((w as any).cash_balance ?? 0); setTier(w.tier); setFrozen(w.frozen); }
     else { try { await supabase.rpc("claim_daily_bonus" as any); } catch {} }
     setTxs((t as any) ?? []);
     setCampaigns((c as any) ?? []);
@@ -93,6 +96,15 @@ const Wallet = () => {
     if (error) toast.error(error.message); else { toast.success("Sent ✈️"); setSendTo(""); setSendAmt(""); refresh(); }
   };
 
+  const sendCash = async () => {
+    const n = parseInt(cashAmt, 10);
+    if (!cashTo || !n || n <= 0) { toast.error("Pick a recipient and amount"); return; }
+    setBusy(true);
+    const { error } = await supabase.rpc("wallet_cash_transfer" as any, { _to: cashTo, _amount: n });
+    setBusy(false);
+    if (error) toast.error(error.message); else { toast.success(`Sent KSh ${n.toLocaleString()} 💸`); setCashTo(""); setCashAmt(""); refresh(); }
+  };
+
   const claimCampaign = async (id: string) => {
     setBusy(true);
     const { error } = await supabase.rpc("claim_campaign" as any, { _cid: id });
@@ -112,8 +124,10 @@ const Wallet = () => {
 
       <Card className="gradient-card p-5 mb-4 relative overflow-hidden">
         {frozen && <div className="absolute top-2 right-2 text-xs font-bold text-destructive bg-destructive/10 px-2 py-1 rounded">FROZEN</div>}
-        <p className="text-xs text-muted-foreground">Balance</p>
-        <p className="text-4xl font-extrabold">{balance.toLocaleString()} <span className="text-base font-normal text-muted-foreground">pts</span></p>
+        <p className="text-xs text-muted-foreground">Money balance</p>
+        <p className="text-4xl font-extrabold">KSh {cash.toLocaleString()}</p>
+        <p className="text-xs text-muted-foreground mt-3">Reward points</p>
+        <p className="text-2xl font-extrabold">{balance.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">pts</span></p>
         <p className={`text-sm mt-1 font-semibold ${tierInfo.color}`}><Trophy className="inline h-4 w-4 mr-1" />{tierInfo.label}</p>
         {nextTier && (
           <p className="text-[11px] text-muted-foreground mt-1">{(nextTier[1].min - balance).toLocaleString()} pts to {nextTier[1].label}</p>
@@ -166,6 +180,15 @@ const Wallet = () => {
 
         <TabsContent value="send" className="space-y-2 mt-3">
           <Card className="gradient-card p-4 space-y-2">
+            <p className="font-semibold text-sm flex items-center gap-1"><Send className="h-4 w-4" /> Send money (KSh)</p>
+            <p className="text-[11px] text-muted-foreground">Available: KSh {cash.toLocaleString()}</p>
+            <Label className="text-xs">Recipient user ID</Label>
+            <Input value={cashTo} onChange={e => setCashTo(e.target.value)} placeholder="uuid…" />
+            <Label className="text-xs">Amount (KSh)</Label>
+            <Input inputMode="numeric" value={cashAmt} onChange={e => setCashAmt(e.target.value.replace(/\D/g, ""))} placeholder="500" />
+            <Button className="w-full gradient-accent" disabled={busy} onClick={sendCash}>Send money</Button>
+          </Card>
+          <Card className="gradient-card p-4 space-y-2">
             <p className="font-semibold text-sm flex items-center gap-1"><Send className="h-4 w-4" /> Send points to a user</p>
             <Label className="text-xs">Recipient user ID</Label>
             <Input value={sendTo} onChange={e => setSendTo(e.target.value)} placeholder="uuid…" />
@@ -178,8 +201,8 @@ const Wallet = () => {
 
         <TabsContent value="redeem" className="space-y-3 mt-3">
           <Card className="gradient-card p-4 space-y-2">
-            <p className="font-semibold text-sm flex items-center gap-1"><Sparkles className="h-4 w-4" /> Top up wallet</p>
-            <p className="text-xs text-muted-foreground">Buy points instantly — KSh 1 = 1 point. Credited the moment payment confirms.</p>
+            <p className="font-semibold text-sm flex items-center gap-1"><Sparkles className="h-4 w-4" /> Add money to wallet</p>
+            <p className="text-xs text-muted-foreground">Add real money to your wallet in KSh. Credited the moment payment confirms.</p>
             <div className="space-y-2">
               <Label htmlFor="topup-amt" className="text-xs">Amount (KSh)</Label>
               <Input id="topup-amt" inputMode="numeric" value={topup} onChange={e => setTopup(e.target.value.replace(/\D/g, ""))} placeholder="e.g. 500" />
@@ -220,8 +243,8 @@ const Wallet = () => {
                 <p className="text-[10px] text-muted-foreground">{new Date(t.created_at).toLocaleString()} · {t.type}</p>
               </div>
               <div className="text-right">
-                <p className={`text-sm font-bold ${t.amount > 0 ? "text-emerald-400" : "text-destructive"}`}>{t.amount > 0 ? "+" : ""}{t.amount}</p>
-                <p className="text-[10px] text-muted-foreground">bal {t.balance_after}</p>
+                <p className={`text-sm font-bold ${t.amount > 0 ? "text-emerald-400" : "text-destructive"}`}>{t.amount > 0 ? "+" : ""}{t.is_cash ? `KSh ${Math.abs(t.amount).toLocaleString()}` : `${t.amount} pts`}</p>
+                <p className="text-[10px] text-muted-foreground">bal {t.is_cash ? `KSh ${t.balance_after.toLocaleString()}` : `${t.balance_after} pts`}</p>
               </div>
             </Card>
           ))}
