@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { isMobile, isMobileNotifyEnabled, setMobileNotifyEnabled } from "@/lib/mobileNotifications";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { NotificationPreferences } from "@/components/NotificationPreferences";
 
 const Profile = () => {
   const { user, isAdmin, signOut } = useAuth();
@@ -120,6 +121,8 @@ const Profile = () => {
         </div>
         <Switch checked={mobileNotify} onCheckedChange={(v) => { setMobileNotify(v); setMobileNotifyEnabled(v); }} />
       </Card>
+
+      <NotificationPreferences />
 
       <Card className="p-4 gradient-card mt-3">
         <p className="text-xs text-muted-foreground mb-2">App contact</p>

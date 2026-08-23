@@ -25,6 +25,7 @@ export const NotificationBell = () => {
   const { user } = useAuth();
   const [items, setItems] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(true);
 
   const load = async () => {
     if (!user) return;
@@ -40,6 +41,8 @@ export const NotificationBell = () => {
   useEffect(() => {
     if (!user) return;
     load();
+    supabase.from("notification_preferences").select("push_enabled").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => setPushEnabled(data?.push_enabled ?? true));
     const ch = supabase
       .channel("notif-" + user.id)
       .on(
@@ -49,15 +52,17 @@ export const NotificationBell = () => {
           const n = payload.new as Notification;
           setItems((prev) => [n, ...prev]);
           toast(n.title, { description: n.body ?? undefined });
-          showBrowserNotification(n.title, n.body ?? undefined, n.link ?? undefined);
-          showMobileNotification(n.title, n.body ?? undefined, n.link ?? undefined);
+          if (pushEnabled) {
+            showBrowserNotification(n.title, n.body ?? undefined, n.link ?? undefined);
+            showMobileNotification(n.title, n.body ?? undefined, n.link ?? undefined);
+          }
         }
       )
       .subscribe();
     return () => {
       supabase.removeChannel(ch);
     };
-  }, [user?.id]);
+  }, [user?.id, pushEnabled]);
 
   const unread = items.filter((i) => !i.is_read).length;
 

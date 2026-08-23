@@ -746,6 +746,36 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          user_id: string
+          email_enabled: boolean
+          sms_enabled: boolean
+          push_enabled: boolean
+          order_updates: boolean
+          delivery_alerts: boolean
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          email_enabled?: boolean
+          sms_enabled?: boolean
+          push_enabled?: boolean
+          order_updates?: boolean
+          delivery_alerts?: boolean
+          updated_at?: string
+        }
+        Update: {
+          email_enabled?: boolean
+          sms_enabled?: boolean
+          push_enabled?: boolean
+          order_updates?: boolean
+          delivery_alerts?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       promo_codes: {
         Row: {
           active: boolean
