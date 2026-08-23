@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag } from "lucide-react";
-import { PayPalButton } from "@/components/PayPalButton";
-import { PesapalButton } from "@/components/PesapalButton";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type Props = {
   listingId: string;
@@ -15,7 +15,15 @@ type Props = {
 
 export const BuyDialog = ({ listingId, price, title, quantity = 1, trigger }: Props) => {
   const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
   const total = price * quantity;
+
+  const buyWithWallet = async () => {
+    setBusy(true);
+    const { error } = await supabase.rpc("wallet_cash_purchase" as any, { _listing_id: listingId, _quantity: quantity });
+    setBusy(false);
+    if (error) toast.error(error.message); else { toast.success("Purchase successful"); setOpen(false); }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -38,10 +46,8 @@ export const BuyDialog = ({ listingId, price, title, quantity = 1, trigger }: Pr
             <span className="text-xl font-extrabold text-primary">KSh {total.toLocaleString()}</span>
           </div>
 
-          <PesapalButton kind="purchase" listingId={listingId} quantity={quantity} label="M-Pesa / Card" />
-          <PayPalButton kind="purchase" listingId={listingId} quantity={quantity} label="Pay with PayPal" />
-
-          <p className="text-[10px] text-muted-foreground text-center">Secure checkout powered by PesaPal & PayPal</p>
+          <Button className="w-full gradient-accent" disabled={busy} onClick={buyWithWallet}>Pay KSh {total.toLocaleString()} from wallet</Button>
+          <p className="text-[10px] text-muted-foreground text-center">Wallet funds can be used only for Camplink marketplace purchases.</p>
         </div>
       </DialogContent>
     </Dialog>

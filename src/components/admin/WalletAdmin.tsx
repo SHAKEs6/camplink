@@ -5,15 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Wallet as WalletIcon, Plus, Minus, Snowflake, Sun, Trash2, Megaphone, Ticket, Banknote } from "lucide-react";
+import { Wallet as WalletIcon, Plus, Minus, Snowflake, Sun, Trash2, Megaphone, Ticket, Copy } from "lucide-react";
 import { toast } from "sonner";
 
 type WalletRow = { user_id: string; balance: number; tier: string; frozen: boolean; display_name?: string; email?: string };
-type WithdrawalRow = { id: string; user_id: string; amount: number; phone: string; status: string; note: string | null; created_at: string; display_name?: string | null; email?: string | null };
 
 export const WalletAdmin = () => {
   const [wallets, setWallets] = useState<WalletRow[]>([]);
-  const [withdrawals, setWithdrawals] = useState<WithdrawalRow[]>([]);
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [promos, setPromos] = useState<any[]>([]);
   const [cTitle, setCTitle] = useState("");
@@ -25,17 +23,15 @@ export const WalletAdmin = () => {
   const [busy, setBusy] = useState(false);
 
   const load = async () => {
-    const [{ data: w }, { data: p }, { data: c }, { data: pc }, { data: wr }] = await Promise.all([
+    const [{ data: w }, { data: p }, { data: c }, { data: pc }] = await Promise.all([
       supabase.from("wallets").select("*").order("balance", { ascending: false }),
       supabase.from("profiles").select("id,display_name,email"),
       supabase.from("reward_campaigns").select("*").order("created_at", { ascending: false }),
       supabase.from("promo_codes").select("*").order("created_at", { ascending: false }),
-      supabase.rpc("admin_list_cash_withdrawals" as any),
     ]);
     const byId = new Map((p ?? []).map(u => [u.id, u]));
     setWallets(((w as any) ?? []).map((x: any) => ({ ...x, ...byId.get(x.user_id) })));
     setCampaigns(c ?? []); setPromos(pc ?? []);
-    setWithdrawals((wr as any) ?? []);
   };
   useEffect(() => { load(); }, []);
 
@@ -50,10 +46,9 @@ export const WalletAdmin = () => {
     if (error) toast.error(error.message); else { toast.success(frozen ? "Frozen" : "Unfrozen"); load(); }
   };
 
-  const processWithdrawal = async (id: string, approve: boolean) => {
-    const note = prompt(`${approve ? "Approve" : "Reject"} withdrawal — optional note?`) ?? undefined;
-    const { error } = await supabase.rpc((approve ? "admin_approve_cash_withdrawal" : "admin_reject_cash_withdrawal") as any, { _request_id: id, _note: note });
-    if (error) toast.error(error.message); else { toast.success(approve ? "Withdrawal approved" : "Withdrawal rejected and refunded"); load(); }
+  const copyUserId = async (userId: string) => {
+    await navigator.clipboard.writeText(userId);
+    toast.success("User ID copied");
   };
 
   const createCampaign = async () => {
@@ -88,22 +83,6 @@ export const WalletAdmin = () => {
 
   return (
     <div className="space-y-4">
-      <Card className="gradient-card p-4">
-        <p className="font-semibold text-sm flex items-center gap-2 mb-2"><Banknote className="h-4 w-4" />Withdrawal requests</p>
-        <div className="space-y-2 max-h-[360px] overflow-y-auto">
-          {withdrawals.length === 0 && <p className="text-xs text-muted-foreground">No withdrawal requests.</p>}
-          {withdrawals.map(w => (
-            <div key={w.id} className="border-t border-border pt-2 flex items-center justify-between gap-2">
-              <div className="min-w-0">
-                <p className="text-sm font-medium truncate">KSh {Number(w.amount).toLocaleString()} · {w.phone}</p>
-                <p className="text-xs text-muted-foreground truncate">{w.display_name ?? w.email ?? w.user_id.slice(0, 8)} · {w.status} · {new Date(w.created_at).toLocaleString()}</p>
-              </div>
-              {w.status === "pending" && <div className="flex gap-1 shrink-0"><Button size="sm" className="h-8" onClick={() => processWithdrawal(w.id, true)}>Approve</Button><Button size="sm" variant="outline" className="h-8 text-destructive" onClick={() => processWithdrawal(w.id, false)}>Reject</Button></div>}
-            </div>
-          ))}
-        </div>
-      </Card>
-
       <Card className="gradient-card p-4">
         <p className="font-semibold text-sm flex items-center gap-2 mb-2"><Megaphone className="h-4 w-4" />Reward campaigns</p>
         <div className="space-y-2 mb-3">
@@ -145,9 +124,11 @@ export const WalletAdmin = () => {
             <div key={w.user_id} className="flex items-center justify-between gap-2 border-t border-border pt-2">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium truncate">{w.display_name ?? w.email ?? w.user_id.slice(0, 8)}</p>
+                <p className="text-[10px] text-muted-foreground truncate">ID: {w.user_id}</p>
                 <p className="text-xs text-muted-foreground">{w.balance.toLocaleString()} pts · {w.tier}{w.frozen && " · ❄️ frozen"}</p>
               </div>
               <div className="flex gap-1">
+                <Button size="icon" variant="outline" className="h-8 w-8" title="Copy user ID" onClick={() => copyUserId(w.user_id)}><Copy className="h-3 w-3" /></Button>
                 <Button size="icon" variant="outline" className="h-8 w-8" title="Credit 100" onClick={() => adjust(w.user_id, 100)}><Plus className="h-3 w-3" /></Button>
                 <Button size="icon" variant="outline" className="h-8 w-8" title="Debit 100" onClick={() => adjust(w.user_id, -100)}><Minus className="h-3 w-3" /></Button>
                 <Button size="icon" variant="outline" className="h-8 w-8" title={w.frozen ? "Unfreeze" : "Freeze"} onClick={() => freeze(w.user_id, !w.frozen)}>
