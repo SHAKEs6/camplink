@@ -1110,6 +1110,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_cash_adjust: {
+        Args: { _amount: number; _note?: string; _uid: string }
+        Returns: number
+      }
       admin_freeze_wallet: {
         Args: { _frozen: boolean; _uid: string }
         Returns: undefined
