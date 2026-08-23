@@ -1046,6 +1046,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_cash: boolean
           ref_id: string | null
           type: string
           user_id: string
@@ -1056,6 +1057,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_cash?: boolean
           ref_id?: string | null
           type: string
           user_id: string
@@ -1066,6 +1068,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_cash?: boolean
           ref_id?: string | null
           type?: string
           user_id?: string
@@ -1075,6 +1078,7 @@ export type Database = {
       wallets: {
         Row: {
           balance: number
+          cash_balance: number
           created_at: string
           frozen: boolean
           tier: string
@@ -1083,6 +1087,7 @@ export type Database = {
         }
         Insert: {
           balance?: number
+          cash_balance?: number
           created_at?: string
           frozen?: boolean
           tier?: string
@@ -1091,6 +1096,7 @@ export type Database = {
         }
         Update: {
           balance?: number
+          cash_balance?: number
           created_at?: string
           frozen?: boolean
           tier?: string
@@ -1127,6 +1133,30 @@ export type Database = {
       is_suspended: { Args: { _user_id: string }; Returns: boolean }
       redeem_promo: { Args: { _code: string }; Returns: number }
       tier_for: { Args: { _bal: number }; Returns: string }
+      wallet_cash_credit: {
+        Args: {
+          _amount: number
+          _desc?: string
+          _ref?: string
+          _type: string
+          _uid: string
+        }
+        Returns: number
+      }
+      wallet_cash_debit: {
+        Args: {
+          _amount: number
+          _desc?: string
+          _ref?: string
+          _type: string
+          _uid: string
+        }
+        Returns: number
+      }
+      wallet_cash_transfer: {
+        Args: { _amount: number; _note?: string; _to: string }
+        Returns: number
+      }
       wallet_credit: {
         Args: {
           _amount: number
