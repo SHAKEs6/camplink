@@ -35,10 +35,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setTimeout(() => {
           supabase.from("user_roles").select("role").eq("user_id", s.user.id).eq("role", "admin").maybeSingle()
             .then(({ data }) => setIsAdmin(!!data));
-          // Request phone/desktop notification permission on login
-          if (typeof Notification !== "undefined" && Notification.permission === "default") {
-            Notification.requestPermission().catch(() => {});
-          }
           // Apply pending referral once
           const ref = localStorage.getItem("pending_referral");
           if (ref && ref !== s.user.id) {

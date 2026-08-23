@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Wallet as WalletIcon, Send, History, PlusCircle } from "lucide-react";
+import { Wallet as WalletIcon, Send, History, PlusCircle, Banknote } from "lucide-react";
 import { toast } from "sonner";
 import { PesapalButton } from "@/components/PesapalButton";
 import { PayPalButton } from "@/components/PayPalButton";
@@ -21,6 +21,8 @@ const Wallet = () => {
   const [txs, setTxs] = useState<Tx[]>([]);
   const [cashTo, setCashTo] = useState("");
   const [cashAmt, setCashAmt] = useState("");
+  const [withdrawPhone, setWithdrawPhone] = useState("");
+  const [withdrawAmt, setWithdrawAmt] = useState("");
   const [busy, setBusy] = useState(false);
   const [topup, setTopup] = useState("");
 
@@ -52,9 +54,18 @@ const Wallet = () => {
     const n = parseInt(cashAmt, 10);
     if (!cashTo || !n || n <= 0) { toast.error("Pick a recipient and amount"); return; }
     setBusy(true);
-    const { error } = await supabase.rpc("wallet_cash_transfer" as any, { _to: cashTo, _amount: n });
+    const { error } = await supabase.rpc("wallet_cash_transfer_to" as any, { _recipient: cashTo, _amount: n });
     setBusy(false);
     if (error) toast.error(error.message); else { toast.success(`Sent KSh ${n.toLocaleString()} 💸`); setCashTo(""); setCashAmt(""); refresh(); }
+  };
+
+  const requestWithdrawal = async () => {
+    const n = parseInt(withdrawAmt, 10);
+    if (!n || n < 10 || !withdrawPhone.trim()) { toast.error("Enter a valid phone number and at least KSh 10"); return; }
+    setBusy(true);
+    const { error } = await supabase.rpc("request_cash_withdrawal" as any, { _amount: n, _phone: withdrawPhone.trim() });
+    setBusy(false);
+    if (error) toast.error(error.message); else { toast.success("Withdrawal request submitted"); setWithdrawAmt(""); refresh(); }
   };
 
   return (
@@ -69,9 +80,10 @@ const Wallet = () => {
       </Card>
 
       <Tabs defaultValue="deposit">
-        <TabsList className="grid grid-cols-3 w-full">
+        <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="deposit"><PlusCircle className="h-3 w-3 mr-1" />Deposit</TabsTrigger>
           <TabsTrigger value="send"><Send className="h-3 w-3 mr-1" />Send</TabsTrigger>
+          <TabsTrigger value="withdraw"><Banknote className="h-3 w-3 mr-1" />Withdraw</TabsTrigger>
           <TabsTrigger value="history"><History className="h-3 w-3 mr-1" />History</TabsTrigger>
         </TabsList>
 
@@ -97,12 +109,25 @@ const Wallet = () => {
           <Card className="gradient-card p-4 space-y-2">
             <p className="font-semibold text-sm flex items-center gap-1"><Send className="h-4 w-4" /> Send money (KSh)</p>
             <p className="text-[11px] text-muted-foreground">Available: KSh {cash.toLocaleString()}</p>
-            <Label className="text-xs">Recipient user ID</Label>
-            <Input value={cashTo} onChange={e => setCashTo(e.target.value)} placeholder="uuid…" />
+            <Label className="text-xs">Recipient username, phone, email, or ID</Label>
+            <Input value={cashTo} onChange={e => setCashTo(e.target.value)} placeholder="username or 0712 345 678" />
             <Label className="text-xs">Amount (KSh)</Label>
             <Input inputMode="numeric" value={cashAmt} onChange={e => setCashAmt(e.target.value.replace(/\D/g, ""))} placeholder="500" />
             <Button className="w-full gradient-accent" disabled={busy} onClick={sendCash}>Send money</Button>
-            <p className="text-[11px] text-muted-foreground">Tip: copy a user's ID from their profile page.</p>
+            <p className="text-[11px] text-muted-foreground">Use the exact username or phone number saved on their profile.</p>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="withdraw" className="space-y-2 mt-3">
+          <Card className="gradient-card p-4 space-y-2">
+            <p className="font-semibold text-sm flex items-center gap-1"><Banknote className="h-4 w-4" /> Withdraw money (KSh)</p>
+            <p className="text-[11px] text-muted-foreground">Available: KSh {cash.toLocaleString()}. Funds are reserved immediately and returned if an admin rejects the request.</p>
+            <Label className="text-xs">M-Pesa phone number</Label>
+            <Input value={withdrawPhone} onChange={e => setWithdrawPhone(e.target.value)} placeholder="0712 345 678" inputMode="tel" />
+            <Label className="text-xs">Amount (KSh)</Label>
+            <Input inputMode="numeric" value={withdrawAmt} onChange={e => setWithdrawAmt(e.target.value.replace(/\D/g, ""))} placeholder="500" />
+            <Button className="w-full gradient-accent" disabled={busy} onClick={requestWithdrawal}>Request withdrawal</Button>
+            <p className="text-[11px] text-muted-foreground">Minimum withdrawal: KSh 10. An admin will process the M-Pesa payout.</p>
           </Card>
         </TabsContent>
 

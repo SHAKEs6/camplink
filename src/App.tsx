@@ -28,6 +28,7 @@ import { ThemeProvider } from "./components/ThemeProvider";
 import { RealtimeNotificationPopup } from "./components/RealtimeNotificationPopup";
 import { MusicPlayer } from "./components/MusicPlayer";
 import { Decorations } from "./components/Decorations";
+import { OneSignalProvider } from "./components/OneSignalProvider";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
       <BrowserRouter>
         <ThemeProvider>
         <AuthProvider>
+          <OneSignalProvider />
           <Routes>
             <Route path="/anon" element={<Anon />} />
             <Route path="/auth" element={<Auth />} />

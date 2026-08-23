@@ -17,6 +17,7 @@ const Profile = () => {
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
   const [suspended, setSuspended] = useState(false);
@@ -27,9 +28,10 @@ const Profile = () => {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("display_name,phone,avatar_url,suspended").eq("id", user.id).maybeSingle()
+    supabase.from("profiles").select("display_name,username,phone,avatar_url,suspended").eq("id", user.id).maybeSingle()
       .then(({ data }) => {
         setName(data?.display_name ?? "");
+        setUsername(data?.username ?? "");
         setPhone(data?.phone ?? "");
         setAvatar(data?.avatar_url ?? null);
         setSuspended(!!data?.suspended);
@@ -47,6 +49,7 @@ const Profile = () => {
     if (!user) return;
     const { error } = await supabase.from("profiles").update({
       display_name: name.slice(0,60),
+      username: username.trim().toLowerCase().replace(/[^a-z0-9_.-]/g, "").slice(0,30) || null,
       phone: phone.slice(0,30),
       avatar_url: avatar,
     }).eq("id", user.id);
@@ -81,6 +84,7 @@ const Profile = () => {
           {isAdmin && <span className="inline-flex items-center gap-1 text-[10px] mt-1 px-2 py-0.5 rounded-full bg-accent/20 text-accent font-semibold"><Shield className="h-3 w-3" />Admin</span>}
         </div>
         <div><Label>Display name</Label><Input value={name} onChange={e => setName(e.target.value)} maxLength={60} /></div>
+        <div><Label>Username</Label><Input value={username} onChange={e => setUsername(e.target.value)} placeholder="your_username" maxLength={30} /><p className="text-[11px] text-muted-foreground mt-1">Others can use this username to send you money.</p></div>
         <div><Label>Phone</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+254…" maxLength={30} /></div>
         <Button className="w-full gradient-accent" onClick={save}>Save profile</Button>
       </Card>

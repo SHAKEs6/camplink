@@ -716,6 +716,7 @@ export type Database = {
           email: string | null
           id: string
           phone: string | null
+          username: string | null
           suspended: boolean
           updated_at: string
         }
@@ -727,6 +728,7 @@ export type Database = {
           email?: string | null
           id: string
           phone?: string | null
+          username?: string | null
           suspended?: boolean
           updated_at?: string
         }
@@ -738,6 +740,7 @@ export type Database = {
           email?: string | null
           id?: string
           phone?: string | null
+          username?: string | null
           suspended?: boolean
           updated_at?: string
         }
@@ -1116,6 +1119,28 @@ export type Database = {
       }
       admin_freeze_wallet: {
         Args: { _frozen: boolean; _uid: string }
+        Returns: undefined
+      }
+      admin_approve_cash_withdrawal: {
+        Args: { _note?: string; _request_id: string }
+        Returns: undefined
+      }
+      admin_list_cash_withdrawals: {
+        Args: never
+        Returns: {
+          amount: number
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          note: string | null
+          phone: string
+          status: string
+          user_id: string
+        }[]
+      }
+      admin_reject_cash_withdrawal: {
+        Args: { _note?: string; _request_id: string }
         Returns: undefined
       }
       admin_wallet_adjust: {

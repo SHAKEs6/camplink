@@ -8,7 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-import { requestNotificationPermission, showBrowserNotification } from "@/lib/browserNotifications";
+import { showBrowserNotification } from "@/lib/browserNotifications";
 import { showMobileNotification } from "@/lib/mobileNotifications";
 
 type Notification = {
@@ -40,7 +40,6 @@ export const NotificationBell = () => {
   useEffect(() => {
     if (!user) return;
     load();
-    requestNotificationPermission();
     const ch = supabase
       .channel("notif-" + user.id)
       .on(
