@@ -60,6 +60,7 @@ Deno.serve(async (req) => {
           order_id: order.id,
         }).select();
       }
+      if (status === 'paid') await admin.rpc('notify_order_seller', { _order_id: order.id });
     }
 
     return new Response(JSON.stringify({ ResultCode: 0, ResultDesc: 'Accepted' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });

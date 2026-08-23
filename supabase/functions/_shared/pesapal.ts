@@ -114,5 +114,6 @@ export async function fulfilOrder(admin: any, orderId: string, receipt: string |
   }
 
   await admin.from('notifications').insert(notifs);
+  await admin.rpc('notify_order_seller', { _order_id: order.id });
   return { status: 'paid', kind: order.kind, amount: order.amount };
 }

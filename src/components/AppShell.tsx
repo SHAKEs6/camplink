@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { Home, ShoppingBag, Heart, Megaphone, MessageCircle, Wallet, LayoutDashboard } from "lucide-react";
+import { Home, ShoppingBag, Heart, Megaphone, MessageCircle, Wallet, LayoutDashboard, Package } from "lucide-react";
 import { Logo } from "./Logo";
 import { BottomNav } from "./BottomNav";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,6 +37,7 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
               { to: "/dating", label: "Hookup", icon: Heart },
               { to: "/chat", label: "Chat", icon: MessageCircle },
               { to: "/wallet", label: "Wallet", icon: Wallet },
+              { to: "/orders", label: "Orders", icon: Package },
             ].map(({ to, label, icon: Icon, end }) => (
               <NavLink
                 key={to}

@@ -24,12 +24,16 @@ import Reels from "./pages/Reels.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import PaypalReturn from "./pages/PaypalReturn.tsx";
 import PesapalReturn from "./pages/PesapalReturn.tsx";
+import Cart from "./pages/Cart.tsx";
+import Orders from "./pages/Orders.tsx";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { RealtimeNotificationPopup } from "./components/RealtimeNotificationPopup";
 import { MusicPlayer } from "./components/MusicPlayer";
 import { Decorations } from "./components/Decorations";
 import { OneSignalProvider } from "./components/OneSignalProvider";
 import NotFound from "./pages/NotFound.tsx";
+import { CookieConsent } from "./components/CookieConsent";
+import { AIAssistant } from "./components/AIAssistant";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +42,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <CookieConsent />
       <BrowserRouter>
         <ThemeProvider>
         <AuthProvider>
@@ -58,6 +63,8 @@ const App = () => (
             <Route path="/dating/edit" element={<ProtectedRoute><DatingEdit /></ProtectedRoute>} />
             <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
             <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+            <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+            <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
             <Route path="/reels" element={<ProtectedRoute><Reels /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/paypal/return" element={<ProtectedRoute><PaypalReturn /></ProtectedRoute>} />
@@ -69,6 +76,7 @@ const App = () => (
           <RealtimeNotificationPopup />
           <MusicPlayer />
           <Decorations />
+          <AIAssistant />
         </AuthProvider>
         </ThemeProvider>
       </BrowserRouter>

@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { PesapalButton } from "./PesapalButton";
 import { PayPalButton } from "./PayPalButton";
 import { downloadReceipt } from "@/lib/receipt";
+import { validateDeliveryDetails } from "@/lib/orderValidation";
 
 type Props = {
   listingId: string;
@@ -32,15 +33,9 @@ export const BuyDialog = ({ listingId, price, title, quantity = 1, trigger }: Pr
   const delivery = { location: location.trim(), pickup_station: pickupStation.trim(), delivery_method: deliveryMethod, address: address.trim() };
 
   const validateDelivery = () => {
-    if (!delivery.location || !delivery.pickup_station) {
-      toast.error("Choose your location and pickup station");
-      return false;
-    }
-    if (deliveryMethod === "door" && !delivery.address) {
-      toast.error("Enter your door delivery address");
-      return false;
-    }
-    return true;
+    const error = validateDeliveryDetails(delivery);
+    if (error) toast.error(error);
+    return !error;
   };
 
   const buyWithWallet = async () => {
@@ -66,7 +61,7 @@ export const BuyDialog = ({ listingId, price, title, quantity = 1, trigger }: Pr
       </DialogTrigger>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><ShoppingBag className="h-5 w-5 text-primary" />Buy online</DialogTitle>
+          <DialogTitle className="flex items-center gap-2"><ShoppingBag className="h-5 w-5 text-primary" />Place order</DialogTitle>
           <DialogDescription className="line-clamp-2">{title}</DialogDescription>
         </DialogHeader>
 
@@ -90,8 +85,8 @@ export const BuyDialog = ({ listingId, price, title, quantity = 1, trigger }: Pr
           </div>
 
           <Button className="w-full gradient-accent" disabled={busy} onClick={buyWithWallet}>Order and pay KSh {total.toLocaleString()} from wallet</Button>
-          <PesapalButton kind="purchase" listingId={listingId} quantity={quantity} delivery={delivery} label="Order with M-Pesa / Card" />
-          <PayPalButton kind="purchase" listingId={listingId} quantity={quantity} delivery={delivery} label="Order with PayPal" />
+          <PesapalButton kind="purchase" listingId={listingId} quantity={quantity} delivery={delivery} beforeStart={validateDelivery} label="Order with M-Pesa / Card" />
+          <PayPalButton kind="purchase" listingId={listingId} quantity={quantity} delivery={delivery} beforeStart={validateDelivery} label="Order with PayPal" />
           <p className="text-[10px] text-muted-foreground text-center">Your delivery details are shared with the seller only after payment.</p>
           <p className="text-[10px] text-muted-foreground text-center">Wallet funds can be used only for Camplink marketplace purchases.</p>
         </div>

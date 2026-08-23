@@ -98,6 +98,7 @@ Deno.serve(async (req) => {
     }
 
     await admin.from('notifications').insert(notifs);
+    await admin.rpc('notify_order_seller', { _order_id: order.id });
 
     return json({ status: 'paid', receipt, kind: order.kind, amount: order.amount });
   } catch (e) {
