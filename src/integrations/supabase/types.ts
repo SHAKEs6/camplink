@@ -195,6 +195,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
+          is_support: boolean
           last_message_at: string
           name: string
         }
@@ -204,6 +205,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          is_support?: boolean
           last_message_at?: string
           name: string
         }
@@ -213,6 +215,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          is_support?: boolean
           last_message_at?: string
           name?: string
         }

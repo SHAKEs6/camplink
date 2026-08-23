@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { useContactUnlock } from "@/hooks/useContactUnlock";
 import { ContactUnlockDialog } from "@/components/ContactUnlockDialog";
 
-type Conv = { id: string; user_a: string; user_b: string; last_message_at: string; other?: { id: string; display_name: string | null } };
+type Conv = { id: string; user_a: string; user_b: string; last_message_at: string; is_support?: boolean; other?: { id: string; display_name: string | null } };
 type Msg = { id: string; conversation_id: string; sender_id: string; content: string; created_at: string };
 type Group = { id: string; name: string; description: string | null; avatar_url: string | null; last_message_at: string };
 type GMsg = { id: string; group_id: string; sender_id: string; content: string; created_at: string; sender_name?: string };
@@ -23,6 +23,7 @@ const Chat = () => {
   const [params, setParams] = useSearchParams();
   const activeId = params.get("c");
   const activeGroup = params.get("g");
+  const wantsSupport = params.get("support") === "1";
   const [convos, setConvos] = useState<Conv[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -73,6 +74,13 @@ const Chat = () => {
   };
 
   useEffect(() => { loadConvos(); loadGroups(); }, [user]);
+  useEffect(() => {
+    if (!user || !wantsSupport || activeId) return;
+    (supabase.rpc as any)("open_support_chat").then(({ data, error }: any) => {
+      if (error) toast.error(error.message);
+      else if (data) setParams({ c: String(data) });
+    });
+  }, [user?.id, wantsSupport, activeId]);
   useEffect(() => { loadMessages(); }, [activeId]);
   useEffect(() => { loadGMessages(); }, [activeGroup]);
 
@@ -135,23 +143,23 @@ const Chat = () => {
 
   if (activeId) {
     const conv = activeConv;
-    const unlocked = dmUnlocked;
+    const unlocked = !!conv?.is_support || dmUnlocked;
     const refresh = refreshUnlock;
     return (
       <AppShell>
         <div className="flex items-center gap-3 mb-3">
           <Button size="icon" variant="ghost" onClick={() => setParams({})}><ArrowLeft className="h-5 w-5" /></Button>
           <Avatar><AvatarFallback className="bg-primary/20 text-primary">{(conv?.other?.display_name ?? "U").slice(0,2).toUpperCase()}</AvatarFallback></Avatar>
-          <p className="font-semibold flex-1">{conv?.other?.display_name ?? "Chat"}</p>
+          <p className="font-semibold flex-1">{conv?.is_support ? "Chat support" : conv?.other?.display_name ?? "Chat"}</p>
           <Button size="icon" variant="ghost" className="text-destructive" onClick={() => deleteConversation(activeId)} title="Delete chat"><Trash2 className="h-4 w-4" /></Button>
         </div>
         <Card className="gradient-card h-[60vh] flex flex-col">
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {!unlocked && otherId && (
-              <div className="rounded-lg border border-dashed border-primary/30 bg-primary/5 p-4 text-center space-y-2">
+                <div className="rounded-lg border border-dashed border-primary/30 bg-primary/5 p-4 text-center space-y-2">
                 <Lock className="h-6 w-6 mx-auto text-primary" />
                 <p className="text-sm font-semibold">Chat is locked</p>
-                <p className="text-xs text-muted-foreground">Unlock this user's contact to send and read messages.</p>
+                  <p className="text-xs text-muted-foreground">Unlock this user's contact to send and read messages.</p>
                 <ContactUnlockDialog sellerId={otherId} sellerName={conv?.other?.display_name ?? undefined} onUnlocked={refresh} />
               </div>
             )}
@@ -232,7 +240,7 @@ const Chat = () => {
               <div className="flex items-center gap-3 flex-1 cursor-pointer min-w-0" onClick={() => setParams({ c: c.id })}>
                 <Avatar><AvatarFallback className="bg-primary/20 text-primary">{(c.other?.display_name ?? "U").slice(0,2).toUpperCase()}</AvatarFallback></Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm truncate">{c.other?.display_name ?? "User"}</p>
+                  <p className="font-semibold text-sm truncate">{c.is_support ? "Chat support" : c.other?.display_name ?? "User"}</p>
                   <p className="text-xs text-muted-foreground">{new Date(c.last_message_at).toLocaleString()}</p>
                 </div>
               </div>
