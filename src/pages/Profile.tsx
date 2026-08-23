@@ -34,7 +34,7 @@ const Profile = () => {
         setAvatar(data?.avatar_url ?? null);
         setSuspended(!!data?.suspended);
       });
-    supabase.from("wallets").select("balance,cash_balance,tier").eq("user_id", user.id).maybeSingle()
+    supabase.from("wallets").select("*").eq("user_id", user.id).maybeSingle()
       .then(({ data }) => { if (data) setWallet({ balance: Number(data.balance) || 0, cash: Number((data as any).cash_balance) || 0, tier: data.tier }); });
     const ch = supabase.channel(`wallet-profile-${user.id}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "wallets", filter: `user_id=eq.${user.id}` },
