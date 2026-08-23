@@ -113,7 +113,7 @@ const Admin = () => {
       title: next ? "Account approved" : "Account approval revoked",
       body: next ? "An administrator approved your Camplink account." : "Your Camplink account approval was revoked. Contact support if this is unexpected.",
       type: "admin_action",
-      link: "/auth",
+      link: next ? "/dashboard" : "/auth",
     });
     toast.success(next ? "User approved" : "User approval revoked");
     load();
