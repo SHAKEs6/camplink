@@ -33,3 +33,5 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.approve_user(uuid, boolean) TO authenticated;
+
+NOTIFY pgrst, 'reload schema';

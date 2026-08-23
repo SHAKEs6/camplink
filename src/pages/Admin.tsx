@@ -106,8 +106,15 @@ const Admin = () => {
 
   const toggleApproval = async (u: Row) => {
     const next = !u.approved;
-    const { error } = await supabase.rpc("approve_user" as any, { _user_id: u.id, _approved: next });
+    const { error } = await supabase.from("profiles").update({ approved: next }).eq("id", u.id);
     if (error) { toast.error(error.message); return; }
+    await supabase.from("notifications").insert({
+      user_id: u.id,
+      title: next ? "Account approved" : "Account approval revoked",
+      body: next ? "An administrator approved your Camplink account." : "Your Camplink account approval was revoked. Contact support if this is unexpected.",
+      type: "admin_action",
+      link: "/auth",
+    });
     toast.success(next ? "User approved" : "User approval revoked");
     load();
   };
