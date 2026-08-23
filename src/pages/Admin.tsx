@@ -100,7 +100,14 @@ const Admin = () => {
     if (!password) return;
     if (password.length < 8) { toast.error("Password must be at least 8 characters"); return; }
     const { error } = await supabase.functions.invoke("admin-reset-password", { body: { target_user_id: u.id, password } });
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      if (u.email) {
+        const { error: emailError } = await supabase.auth.resetPasswordForEmail(u.email, { redirectTo: `${window.location.origin}/reset-password` });
+        if (!emailError) { toast.success("Password reset link sent to the user's email"); return; }
+      }
+      toast.error("Password service is not deployed. Deploy admin-reset-password or use the user's reset email.");
+      return;
+    }
     toast.success("Password changed");
   };
 
