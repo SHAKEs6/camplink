@@ -13,15 +13,16 @@ type Props = {
   disabled?: boolean;
   label?: string;
   className?: string;
+  delivery?: { location: string; pickup_station: string; delivery_method: string; address: string };
 };
 
-export const PayPalButton = ({ kind, sellerId, listingId, quantity = 1, amount, disabled, label = "Pay with PayPal", className }: Props) => {
+export const PayPalButton = ({ kind, sellerId, listingId, quantity = 1, amount, disabled, label = "Pay with PayPal", className, delivery }: Props) => {
   const [loading, setLoading] = useState(false);
 
   const start = async () => {
     setLoading(true);
     const { data, error } = await supabase.functions.invoke("paypal-create-order", {
-      body: { kind, seller_id: sellerId, listing_id: listingId, quantity, amount, origin: window.location.origin },
+      body: { kind, seller_id: sellerId, listing_id: listingId, quantity, amount, ...delivery, origin: window.location.origin },
     });
     let errMsg: string | null = null;
     if (error) {

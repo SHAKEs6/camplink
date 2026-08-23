@@ -610,11 +610,13 @@ export type Database = {
           id: string
           kind: string
           listing_id: string | null
+          location: string | null
           merchant_request_id: string | null
           mpesa_receipt: string | null
           paypal_order_id: string | null
           pesapal_tracking_id: string | null
           phone: string | null
+          pickup_station: string | null
           provider: string
           quantity: number
           raw_callback: Json | null
@@ -622,6 +624,8 @@ export type Database = {
           result_desc: string | null
           seller_id: string | null
           status: string
+          delivery_method: string
+          delivery_address: string | null
           updated_at: string
         }
         Insert: {
@@ -633,11 +637,13 @@ export type Database = {
           id?: string
           kind?: string
           listing_id?: string | null
+          location?: string | null
           merchant_request_id?: string | null
           mpesa_receipt?: string | null
           paypal_order_id?: string | null
           pesapal_tracking_id?: string | null
           phone?: string | null
+          pickup_station?: string | null
           provider?: string
           quantity?: number
           raw_callback?: Json | null
@@ -645,6 +651,8 @@ export type Database = {
           result_desc?: string | null
           seller_id?: string | null
           status?: string
+          delivery_method?: string
+          delivery_address?: string | null
           updated_at?: string
         }
         Update: {
@@ -656,11 +664,13 @@ export type Database = {
           id?: string
           kind?: string
           listing_id?: string | null
+          location?: string | null
           merchant_request_id?: string | null
           mpesa_receipt?: string | null
           paypal_order_id?: string | null
           pesapal_tracking_id?: string | null
           phone?: string | null
+          pickup_station?: string | null
           provider?: string
           quantity?: number
           raw_callback?: Json | null
@@ -668,6 +678,8 @@ export type Database = {
           result_desc?: string | null
           seller_id?: string | null
           status?: string
+          delivery_method?: string
+          delivery_address?: string | null
           updated_at?: string
         }
         Relationships: [

@@ -35,7 +35,7 @@ const Index = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [query, setQuery] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
-  const [stats, setStats] = useState({ listings: 0, users: 0, today: 0 });
+  const [stats, setStats] = useState({ listings: 0, today: 0 });
   const [greeting, setGreeting] = useState(getGreeting());
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -76,12 +76,11 @@ const Index = () => {
     }
     // Cool stat counters
     const since = new Date(); since.setHours(0, 0, 0, 0);
-    const [{ count: lc }, { count: uc }, { count: tc }] = await Promise.all([
+    const [{ count: lc }, { count: tc }] = await Promise.all([
       supabase.from("listings").select("id", { count: "exact", head: true }),
-      supabase.from("profiles").select("id", { count: "exact", head: true }),
       supabase.from("listings").select("id", { count: "exact", head: true }).gte("created_at", since.toISOString()),
     ]);
-    setStats({ listings: lc ?? 0, users: uc ?? 0, today: tc ?? 0 });
+    setStats({ listings: lc ?? 0, today: tc ?? 0 });
   }, [user, fetchPage]);
 
   useEffect(() => { load(); }, [user, online]);
@@ -183,10 +182,9 @@ const Index = () => {
 
 
       {/* Editorial stats strip */}
-      <div className="grid grid-cols-3 gap-3 mb-8">
+      <div className="grid grid-cols-2 gap-3 mb-8">
         {[
           { label: "Listings", value: stats.listings },
-          { label: "Members", value: stats.users },
           { label: "Today", value: stats.today, icon: Flame },
         ].map(({ label, value, icon: Icon }) => (
           <Card key={label} className="relative overflow-hidden p-4 gradient-card ring-gold">

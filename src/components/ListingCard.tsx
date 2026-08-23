@@ -2,15 +2,13 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Phone, Mail, MapPin, MessageCircle, Trash2, Play, Images, Lock, LogIn } from "lucide-react";
+import { MapPin, Trash2, Play, Images, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { PhotoLightbox } from "./PhotoLightbox";
 import { ListingReviewsDialog } from "./ListingReviewsDialog";
-import { ContactUnlockDialog } from "./ContactUnlockDialog";
-import { useContactUnlock } from "@/hooks/useContactUnlock";
 import { BuyDialog } from "./BuyDialog";
 
 export type Listing = {
@@ -40,22 +38,7 @@ export const ListingCard = ({ listing, onDelete }: { listing: Listing; onDelete?
   const [lightbox, setLightbox] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const allPhotos = (listing.photos && listing.photos.length ? listing.photos : (listing.image_url ? [listing.image_url] : []));
-  const { unlocked, refresh } = useContactUnlock(listing.user_id);
-  const canSeeContact = isOwn || unlocked;
   const requireAuth = () => { navigate("/auth"); };
-
-  const startChat = async () => {
-    if (!user || isOwn) return;
-    const [a, b] = [user.id, listing.user_id].sort();
-    const { data: existing } = await supabase.from("conversations").select("id").eq("user_a", a).eq("user_b", b).maybeSingle();
-    let convoId = existing?.id;
-    if (!convoId) {
-      const { data, error } = await supabase.from("conversations").insert({ user_a: a, user_b: b }).select("id").single();
-      if (error) { toast.error(error.message); return; }
-      convoId = data.id;
-    }
-    window.location.href = `/chat?c=${convoId}`;
-  };
 
   const remove = async () => {
     if (!confirm("Delete this listing?")) return;
@@ -105,29 +88,6 @@ export const ListingCard = ({ listing, onDelete }: { listing: Listing; onDelete?
             <Button size="sm" className="h-7 text-[11px] gradient-accent w-full" onClick={requireAuth}>
               <LogIn className="h-3 w-3 mr-1" />Sign up to view
             </Button>
-          )}
-          {user && !isOwn && !canSeeContact && (
-            <ContactUnlockDialog sellerId={listing.user_id} listingId={listing.id} sellerName={listing.title} onUnlocked={refresh} />
-          )}
-          {user && canSeeContact && listing.contact_phone && (
-            <Button size="sm" variant="outline" className="h-7 text-[11px]" asChild>
-              <a href={`tel:${listing.contact_phone}`}><Phone className="h-3 w-3 mr-1" />Call</a>
-            </Button>
-          )}
-          {user && canSeeContact && listing.contact_email && (
-            <Button size="sm" variant="outline" className="h-7 text-[11px]" asChild>
-              <a href={`mailto:${listing.contact_email}`}><Mail className="h-3 w-3 mr-1" />Email</a>
-            </Button>
-          )}
-          {user && canSeeContact && !isOwn && (
-            <Button size="sm" className="h-7 text-[11px] gradient-accent" onClick={startChat}>
-              <MessageCircle className="h-3 w-3 mr-1" />Chat
-            </Button>
-          )}
-          {user && !isOwn && !canSeeContact && (
-            <Badge variant="outline" className="h-7 text-[10px] flex items-center gap-1 px-2">
-              <Lock className="h-3 w-3" /> Contact locked
-            </Badge>
           )}
           {user && !isOwn && (
             <BuyDialog listingId={listing.id} price={Number(listing.price)} title={listing.title} />

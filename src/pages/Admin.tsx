@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash2, Shield, Send, Ban, CheckCircle2, MessageCircle, Wallet as WalletIcon, Film, Users, Megaphone, Unlock, Lock } from "lucide-react";
+import { Trash2, Shield, Send, Ban, CheckCircle2, MessageCircle, Wallet as WalletIcon, Film, Users, Megaphone, KeyRound } from "lucide-react";
 import { ThemeEditor } from "@/components/ThemeEditor";
 import { WalletAdmin } from "@/components/admin/WalletAdmin";
 import { ReelsAdmin } from "@/components/admin/ReelsAdmin";
@@ -94,12 +94,13 @@ const Admin = () => {
     navigate(`/chat?c=${cid}`);
   };
 
-  const toggleContactAccess = async (u: Row) => {
-    const next = !u.contact_access;
-    const { error } = await supabase.from("profiles").update({ contact_access: next } as any).eq("id", u.id);
+  const resetPassword = async (u: Row) => {
+    const password = prompt(`New password for ${u.email || u.display_name || "this user"} (minimum 8 characters)`);
+    if (!password) return;
+    if (password.length < 8) { toast.error("Password must be at least 8 characters"); return; }
+    const { error } = await supabase.functions.invoke("admin-reset-password", { body: { target_user_id: u.id, password } });
     if (error) { toast.error(error.message); return; }
-    toast.success(next ? "Granted contact access" : "Revoked contact access");
-    load();
+    toast.success("Password changed");
   };
 
   return (
@@ -149,9 +150,8 @@ const Admin = () => {
                   {u.suspended ? <CheckCircle2 className="h-3 w-3 mr-1" /> : <Ban className="h-3 w-3 mr-1" />}
                   {u.suspended ? "Unsuspend" : "Suspend"}
                 </Button>
-                <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" onClick={() => toggleContactAccess(u)}>
-                  {u.contact_access ? <Lock className="h-3 w-3 mr-1" /> : <Unlock className="h-3 w-3 mr-1" />}
-                  {u.contact_access ? "Revoke contacts" : "Grant contacts"}
+                <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" onClick={() => resetPassword(u)}>
+                  <KeyRound className="h-3 w-3 mr-1" />Change password
                 </Button>
                 <Button size="sm" variant="outline" className="flex-1 h-8 text-xs text-destructive" onClick={() => removeUser(u)} disabled={u.id === user?.id}>
                   <Trash2 className="h-3 w-3 mr-1" />Delete

@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadReceipt } from "@/lib/receipt";
 
 const PesapalReturn = () => {
   const [params] = useSearchParams();
@@ -12,6 +13,7 @@ const PesapalReturn = () => {
   const [status, setStatus] = useState<"working" | "paid" | "failed" | "cancelled">("working");
   const [msg, setMsg] = useState("");
   const [kind, setKind] = useState<string>("");
+  const [order, setOrder] = useState<any>(null);
   const tries = useRef(0);
 
   useEffect(() => { document.title = "Payment status — Camplink"; }, []);
@@ -41,7 +43,11 @@ const PesapalReturn = () => {
       if (errMsg) { setStatus("failed"); setMsg(errMsg); return; }
       const s = (data as any)?.status;
       setKind((data as any)?.kind || "");
-      if (s === "paid") { setStatus("paid"); setMsg((data as any)?.receipt ? `Receipt: ${(data as any).receipt}` : ""); setTimeout(() => navigate("/", { replace: true }), 1800); return; }
+      if (s === "paid") {
+        setStatus("paid"); setMsg((data as any)?.receipt ? `Payment reference: ${(data as any).receipt}` : "");
+        const { data: paidOrder } = await supabase.from("orders").select("id,amount,quantity,status,provider,mpesa_receipt,created_at,location,pickup_station,delivery_method,delivery_address,listing_id").eq("id", orderId).maybeSingle();
+        setOrder(paidOrder); return;
+      }
       if (s === "cancelled") { setStatus("cancelled"); setMsg("You cancelled the payment."); return; }
       if (s === "failed") { setStatus("failed"); setMsg((data as any)?.error || "Payment failed."); return; }
       // pending — keep polling for up to ~1 minute
@@ -69,6 +75,7 @@ const PesapalReturn = () => {
               <CheckCircle2 className="h-12 w-12 mx-auto text-green-500" />
               <p className="text-lg font-semibold">Payment successful</p>
               {msg && <p className="text-xs text-muted-foreground">{msg}</p>}
+              {order && <Button variant="outline" className="w-full" onClick={() => downloadReceipt(order, `Camplink order ${order.id}`)}>Download receipt</Button>}
               <Button className="w-full gradient-accent" onClick={() => navigate("/")}>
                 Continue
               </Button>

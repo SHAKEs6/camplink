@@ -49,6 +49,8 @@ Deno.serve(async (req) => {
       title = 'Camplink wallet top-up';
     } else {
       if (!body?.listing_id) return json({ error: 'listing_id required' }, 400);
+      if (typeof body?.location !== 'string' || !body.location.trim() || typeof body?.pickup_station !== 'string' || !body.pickup_station.trim()) return json({ error: 'location and pickup station are required' }, 400);
+      if (body?.delivery_method === 'door' && (typeof body?.address !== 'string' || !body.address.trim())) return json({ error: 'delivery address is required' }, 400);
       const { data: listing } = await admin.from('listings').select('id, user_id, title, price').eq('id', body.listing_id).maybeSingle();
       if (!listing) return json({ error: 'Listing not found' }, 404);
       if (listing.user_id === userId) return json({ error: 'You cannot buy your own listing' }, 400);
@@ -68,6 +70,10 @@ Deno.serve(async (req) => {
       quantity: qty,
       amount,
       phone: (profile as any)?.phone || '',
+      location: typeof body?.location === 'string' ? body.location.trim() : null,
+      pickup_station: typeof body?.pickup_station === 'string' ? body.pickup_station.trim() : null,
+      delivery_method: body?.delivery_method === 'door' ? 'door' : 'pickup',
+      delivery_address: typeof body?.address === 'string' ? body.address.trim() || null : null,
       status: 'pending',
       kind,
       provider: 'pesapal',

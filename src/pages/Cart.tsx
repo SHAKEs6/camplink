@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, ShoppingCart, Phone, Mail, Plus, Minus } from "lucide-react";
+import { Trash2, ShoppingCart, Plus, Minus } from "lucide-react";
 import { Listing } from "@/components/ListingCard";
 import { toast } from "sonner";
 import { cacheGet, cacheSet } from "@/lib/offlineCache";
@@ -96,16 +96,6 @@ const Cart = () => {
                         </Button>
                       </div>
                       <div className="flex gap-1">
-                        {row.listings.contact_phone && (
-                          <Button size="icon" variant="outline" className="h-7 w-7" asChild>
-                            <a href={`tel:${row.listings.contact_phone}`}><Phone className="h-3 w-3" /></a>
-                          </Button>
-                        )}
-                        {row.listings.contact_email && (
-                          <Button size="icon" variant="outline" className="h-7 w-7" asChild>
-                            <a href={`mailto:${row.listings.contact_email}`}><Mail className="h-3 w-3" /></a>
-                          </Button>
-                        )}
                         <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => remove(row.id)}>
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -121,7 +111,7 @@ const Cart = () => {
               <span className="text-sm text-muted-foreground">Total</span>
               <span className="text-xl font-extrabold text-primary">KSh {total.toLocaleString()}</span>
             </div>
-            <p className="text-[11px] text-muted-foreground mt-2">Pay for each item below with PayPal.</p>
+            <p className="text-[11px] text-muted-foreground mt-2">Choose delivery details before placing each order.</p>
             <div className="space-y-2 mt-3">
               {items.filter(i => i.listings).map((row) => (
                 <BuyDialog
@@ -132,7 +122,7 @@ const Cart = () => {
                   quantity={row.quantity}
                   trigger={
                     <Button className="w-full gradient-accent justify-between" size="sm">
-                      <span className="flex items-center gap-2"><ShoppingBag className="h-4 w-4" />Pay {row.quantity}× {row.listings!.title.slice(0, 24)}</span>
+                      <span className="flex items-center gap-2"><ShoppingBag className="h-4 w-4" />Order {row.quantity}× {row.listings!.title.slice(0, 24)}</span>
                       <span className="font-bold">KSh {(Number(row.listings!.price) * row.quantity).toLocaleString()}</span>
                     </Button>
                   }
