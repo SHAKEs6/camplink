@@ -22,6 +22,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [sessionExpired, setSessionExpired] = useState(false);
 
+  const checkApproval = async (activeUser: User) => {
+    const [{ data: role }, { data: profile }] = await Promise.all([
+      supabase.from("user_roles").select("role").eq("user_id", activeUser.id).eq("role", "admin").maybeSingle(),
+      supabase.from("profiles").select("approved").eq("id", activeUser.id).maybeSingle(),
+    ]);
+    const admin = !!role;
+    setIsAdmin(admin);
+    if (!admin && profile?.approved !== true && !activeUser.email_confirmed_at) {
+      setSessionExpired(true);
+      await supabase.auth.signOut();
+      return false;
+    }
+    return true;
+  };
+
   useEffect(() => {
     // Capture referral param if present
     try {
@@ -37,8 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (event === "SIGNED_OUT") setSessionExpired(true);
       if (s?.user) {
         setTimeout(() => {
-          supabase.from("user_roles").select("role").eq("user_id", s.user.id).eq("role", "admin").maybeSingle()
-            .then(({ data }) => setIsAdmin(!!data));
+          checkApproval(s.user);
           // Apply pending referral once
           const ref = localStorage.getItem("pending_referral");
           if (ref && ref !== s.user.id) {

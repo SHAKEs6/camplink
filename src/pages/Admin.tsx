@@ -104,6 +104,14 @@ const Admin = () => {
     toast.success("Password changed");
   };
 
+  const toggleApproval = async (u: Row) => {
+    const next = !u.approved;
+    const { error } = await supabase.rpc("approve_user" as any, { _user_id: u.id, _approved: next });
+    if (error) { toast.error(error.message); return; }
+    toast.success(next ? "User approved" : "User approval revoked");
+    load();
+  };
+
   return (
     <AppShell>
       <div className="flex items-center gap-2 mb-4"><Shield className="h-6 w-6 text-accent" /><h1 className="text-2xl font-extrabold">Admin Panel</h1></div>
@@ -155,6 +163,9 @@ const Admin = () => {
                 </Button>
                 <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" onClick={() => resetPassword(u)}>
                   <KeyRound className="h-3 w-3 mr-1" />Change password
+                </Button>
+                <Button size="sm" variant="outline" className="flex-1 h-8 text-xs" onClick={() => toggleApproval(u)} disabled={u.id === user?.id && u.approved}>
+                  <CheckCircle2 className="h-3 w-3 mr-1" />{u.approved ? "Revoke approval" : "Approve user"}
                 </Button>
                 <Button size="sm" variant="outline" className="flex-1 h-8 text-xs text-destructive" onClick={() => removeUser(u)} disabled={u.id === user?.id}>
                   <Trash2 className="h-3 w-3 mr-1" />Delete
