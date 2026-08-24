@@ -39,14 +39,14 @@ export const downloadReceipt = (order: ReceiptOrder, title: string) => {
   pdf.setTextColor(25, 25, 25);
   pdf.setFontSize(11);
   y = 55;
-  add("Order:", order.id);
+  add("Order:", "Camplink marketplace order");
   add("Buyer:", order.buyer_name || "Camplink buyer");
   add("Date:", new Date(order.created_at).toLocaleString());
   add("Item:", title);
   add("Quantity:", String(order.quantity));
   add("Total:", `KSh ${Number(order.amount).toLocaleString()}`);
   add("Payment:", order.provider);
-  add("Reference:", order.mpesa_receipt || "Pending");
+  add("Reference:", order.mpesa_receipt && !order.mpesa_receipt.startsWith("WALLET-") ? order.mpesa_receipt : "Wallet payment");
   y += 5;
   pdf.setDrawColor(220, 220, 220);
   pdf.line(margin, y, 190, y);
@@ -64,5 +64,5 @@ export const downloadReceipt = (order: ReceiptOrder, title: string) => {
   pdf.setFont("helvetica", "italic");
   pdf.setTextColor(90, 90, 90);
   pdf.text("Thank you for ordering with Camplink Connect.", margin, y);
-  pdf.save(`camplink-receipt-${order.id.slice(0, 8)}.pdf`);
+  pdf.save("camplink-marketplace-receipt.pdf");
 };
