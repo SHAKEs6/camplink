@@ -12,6 +12,7 @@ import { Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { MultiImageUpload } from "./MultiImageUpload";
 import { VideoUpload } from "./VideoUpload";
+import { LocationPicker } from "./LocationPicker";
 
 export const SUBCATEGORIES = [
   "Textbooks", "Electronics", "Furniture", "Clothing", "Services", "Tickets", "Housing", "Other",
@@ -36,6 +37,7 @@ export const AddListingDialog = ({
   const [busy, setBusy] = useState(false);
   const [photos, setPhotos] = useState<string[]>([]);
   const [video, setVideo] = useState<string | null>(null);
+  const [coordinates, setCoordinates] = useState<{ latitude: number | null; longitude: number | null }>({ latitude: null, longitude: null });
   const [form, setForm] = useState({
     title: "", description: "", price: "", category: defaultCategory,
     subcategory: defaultCategory === "housing" ? "Housing" : "Other",
@@ -47,6 +49,7 @@ export const AddListingDialog = ({
     if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
     if (!user) return;
     if (photos.length < 1) { toast.error("Add at least 1 photo (up to 3 recommended)"); return; }
+    if (coordinates.latitude == null || coordinates.longitude == null) { toast.error("Pin the exact listing location"); return; }
     setBusy(true);
     const { error } = await supabase.from("listings").insert({
       user_id: user.id,
@@ -58,6 +61,8 @@ export const AddListingDialog = ({
       contact_phone: parsed.data.contact_phone || null,
       contact_email: parsed.data.contact_email || null,
       location: parsed.data.location || null,
+      location_latitude: coordinates.latitude,
+      location_longitude: coordinates.longitude,
       image_url: photos[0] ?? null,
       photos,
       video_url: video,
@@ -66,7 +71,7 @@ export const AddListingDialog = ({
     if (error) { toast.error(error.message); return; }
     toast.success("Listing posted!");
     setOpen(false);
-    setPhotos([]); setVideo(null);
+    setPhotos([]); setVideo(null); setCoordinates({ latitude: null, longitude: null });
     setForm({ ...form, title: "", description: "", price: "", location: "" });
     onCreated?.();
   };
@@ -103,7 +108,7 @@ export const AddListingDialog = ({
           <div><Label>Title *</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Scientific Calculator FX-991" /></div>
           <div><Label>Price (KSh) *</Label><Input type="number" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="800" /></div>
           <div><Label>Description</Label><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Condition, details…" rows={3} /></div>
-          <div><Label>Location</Label><Input value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} placeholder="Ruiru Town" /></div>
+          <LocationPicker label="Location" text={form.location} latitude={coordinates.latitude} longitude={coordinates.longitude} onTextChange={location => setForm({ ...form, location })} onCoordinatesChange={(latitude, longitude) => setCoordinates({ latitude, longitude })} />
           <div>
             <Label>Photos (2–3 recommended)</Label>
             {user && <MultiImageUpload userId={user.id} values={photos} onChange={setPhotos} max={5} />}

@@ -50,6 +50,7 @@ Deno.serve(async (req) => {
     } else {
       if (!body?.listing_id) return json({ error: 'listing_id required' }, 400);
       if (typeof body?.location !== 'string' || !body.location.trim() || typeof body?.pickup_station !== 'string' || !body.pickup_station.trim()) return json({ error: 'location and pickup station are required' }, 400);
+      if (typeof body?.latitude !== 'number' || typeof body?.longitude !== 'number' || body.latitude < -90 || body.latitude > 90 || body.longitude < -180 || body.longitude > 180) return json({ error: 'exact delivery location is required' }, 400);
       if (body?.delivery_method === 'door' && (typeof body?.address !== 'string' || !body.address.trim())) return json({ error: 'delivery address is required' }, 400);
       const { data: listing } = await admin.from('listings').select('id, user_id, title, price').eq('id', body.listing_id).maybeSingle();
       if (!listing) return json({ error: 'Listing not found' }, 404);
@@ -74,6 +75,8 @@ Deno.serve(async (req) => {
       pickup_station: typeof body?.pickup_station === 'string' ? body.pickup_station.trim() : null,
       delivery_method: body?.delivery_method === 'door' ? 'door' : 'pickup',
       delivery_address: typeof body?.address === 'string' ? body.address.trim() || null : null,
+      delivery_latitude: typeof body?.latitude === 'number' ? body.latitude : null,
+      delivery_longitude: typeof body?.longitude === 'number' ? body.longitude : null,
       status: 'pending',
       kind,
       provider: 'paypal',

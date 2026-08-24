@@ -22,6 +22,8 @@ export type Listing = {
   contact_phone: string | null;
   contact_email: string | null;
   location: string | null;
+  location_latitude?: number | null;
+  location_longitude?: number | null;
   image_url: string | null;
   photos?: string[] | null;
   video_url?: string | null;
@@ -81,6 +83,7 @@ export const ListingCard = ({ listing, onDelete }: { listing: Listing; onDelete?
         </div>
         <p className="text-primary font-bold">KSh {Number(listing.price).toLocaleString()}</p>
         {listing.location && <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" />{listing.location}</p>}
+        {listing.location_latitude != null && listing.location_longitude != null && <a className="text-[11px] text-primary underline" target="_blank" rel="noreferrer" href={`https://www.openstreetmap.org/?mlat=${listing.location_latitude}&mlon=${listing.location_longitude}#map=16/${listing.location_latitude}/${listing.location_longitude}`}>View exact listing location</a>}
         {listing.description && <p className="text-xs text-muted-foreground line-clamp-2">{listing.description}</p>}
 
         <div className="flex flex-wrap gap-1.5 pt-1">

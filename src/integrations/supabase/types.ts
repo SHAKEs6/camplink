@@ -492,6 +492,8 @@ export type Database = {
           image_url: string | null
           is_active: boolean
           location: string | null
+          location_latitude: number | null
+          location_longitude: number | null
           photos: string[]
           price: number
           subcategory: string | null
@@ -510,6 +512,8 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           location?: string | null
+          location_latitude?: number | null
+          location_longitude?: number | null
           photos?: string[]
           price?: number
           subcategory?: string | null
@@ -528,6 +532,8 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean
           location?: string | null
+          location_latitude?: number | null
+          location_longitude?: number | null
           photos?: string[]
           price?: number
           subcategory?: string | null
@@ -629,6 +635,8 @@ export type Database = {
           status: string
           delivery_method: string
           delivery_address: string | null
+          delivery_latitude: number | null
+          delivery_longitude: number | null
           tracking_latitude: number | null
           tracking_longitude: number | null
           tracking_updated_at: string | null
@@ -662,6 +670,8 @@ export type Database = {
           status?: string
           delivery_method?: string
           delivery_address?: string | null
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
           tracking_latitude?: number | null
           tracking_longitude?: number | null
           tracking_updated_at?: string | null
@@ -695,6 +705,8 @@ export type Database = {
           status?: string
           delivery_method?: string
           delivery_address?: string | null
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
           tracking_latitude?: number | null
           tracking_longitude?: number | null
           tracking_updated_at?: string | null

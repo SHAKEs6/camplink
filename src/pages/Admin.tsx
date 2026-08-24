@@ -28,16 +28,19 @@ const Admin = () => {
   const [bcTitle, setBcTitle] = useState("");
   const [bcBody, setBcBody] = useState("");
   const [sending, setSending] = useState(false);
+  const [saleFeeCents, setSaleFeeCents] = useState(0);
 
   useEffect(() => { document.title = "Admin — Camplink"; }, []);
 
   const load = async () => {
-    const [{ data: l }, { data: p }, { data: r }] = await Promise.all([
+    const [{ data: l }, { data: p }, { data: r }, { data: fees }] = await Promise.all([
       supabase.from("listings").select("*").order("created_at", { ascending: false }),
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("reviews").select("*").order("created_at", { ascending: false }),
+      (supabase as any).from("admin_sale_fees").select("fee_cents"),
     ]);
     setListings(l ?? []); setUsers(p ?? []); setReviews(r ?? []);
+    setSaleFeeCents((fees ?? []).reduce((total: number, fee: { fee_cents: number }) => total + Number(fee.fee_cents), 0));
   };
   useEffect(() => { load(); }, []);
 
@@ -130,6 +133,11 @@ const Admin = () => {
       <div className="flex items-center gap-2 mb-4"><Shield className="h-6 w-6 text-accent" /><h1 className="text-2xl font-extrabold">Admin Panel</h1></div>
 
       <ThemeEditor />
+
+      <Card className="gradient-card p-4 mb-4">
+        <p className="text-sm text-muted-foreground">Marketplace fees accrued</p>
+        <p className="mt-1 text-2xl font-extrabold text-primary">KSh {(saleFeeCents / 100).toFixed(2)}</p>
+      </Card>
 
       <Card className="gradient-card p-4 mb-4 space-y-2">
         <p className="font-semibold text-sm flex items-center gap-2"><Send className="h-4 w-4" />Broadcast notification 🔔</p>
