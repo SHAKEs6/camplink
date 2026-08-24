@@ -50,9 +50,9 @@ Deno.serve(async (req) => {
     const userId = claims.claims.sub as string;
 
     const body = await req.json().catch(() => ({}));
-    const { listing_id, quantity, phone, kind, seller_id } = body as {
+    const { listing_id, quantity, phone, kind, seller_id, location, pickup_station, delivery_method, address } = body as {
       listing_id?: string; quantity?: number; phone?: string;
-      kind?: 'purchase' | 'contact_unlock'; seller_id?: string;
+      kind?: 'purchase' | 'contact_unlock'; seller_id?: string; location?: string; pickup_station?: string; delivery_method?: 'pickup' | 'door'; address?: string;
     };
     if (!phone) {
       return new Response(JSON.stringify({ error: 'phone is required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -94,6 +94,8 @@ Deno.serve(async (req) => {
       if (refTitle === 'Camplink') refTitle = 'Contact unlock';
     } else {
       if (!listing_id) return new Response(JSON.stringify({ error: 'listing_id required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      if (!location?.trim() || !pickup_station?.trim()) return new Response(JSON.stringify({ error: 'location and pickup station are required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      if (delivery_method === 'door' && !address?.trim()) return new Response(JSON.stringify({ error: 'delivery address is required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       const { data: listing, error: lerr } = await admin
         .from('listings').select('id, user_id, title, price').eq('id', listing_id).maybeSingle();
       if (lerr || !listing) return new Response(JSON.stringify({ error: 'Listing not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -141,6 +143,10 @@ Deno.serve(async (req) => {
       quantity: qty,
       amount,
       phone: msisdn,
+      location: location?.trim() || null,
+      pickup_station: pickup_station?.trim() || null,
+      delivery_method: delivery_method === 'door' ? 'door' : 'pickup',
+      delivery_address: address?.trim() || null,
       status: 'pending',
       kind: orderKind,
       checkout_request_id: stk.CheckoutRequestID,

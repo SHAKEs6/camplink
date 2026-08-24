@@ -629,6 +629,12 @@ export type Database = {
           status: string
           delivery_method: string
           delivery_address: string | null
+          tracking_latitude: number | null
+          tracking_longitude: number | null
+          tracking_updated_at: string | null
+          delivered_at: string | null
+          cancelled_at: string | null
+          refund_status: string
           updated_at: string
         }
         Insert: {
@@ -656,6 +662,12 @@ export type Database = {
           status?: string
           delivery_method?: string
           delivery_address?: string | null
+          tracking_latitude?: number | null
+          tracking_longitude?: number | null
+          tracking_updated_at?: string | null
+          delivered_at?: string | null
+          cancelled_at?: string | null
+          refund_status?: string
           updated_at?: string
         }
         Update: {
@@ -683,6 +695,12 @@ export type Database = {
           status?: string
           delivery_method?: string
           delivery_address?: string | null
+          tracking_latitude?: number | null
+          tracking_longitude?: number | null
+          tracking_updated_at?: string | null
+          delivered_at?: string | null
+          cancelled_at?: string | null
+          refund_status?: string
           updated_at?: string
         }
         Relationships: [
