@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Wallet as WalletIcon, Send, History, PlusCircle } from "lucide-react";
+import { Wallet as WalletIcon, Send, History, PlusCircle, Gift } from "lucide-react";
 import { toast } from "sonner";
 import { PesapalButton } from "@/components/PesapalButton";
 import { PayPalButton } from "@/components/PayPalButton";
@@ -23,6 +23,7 @@ const Wallet = () => {
   const [cashAmt, setCashAmt] = useState("");
   const [busy, setBusy] = useState(false);
   const [topup, setTopup] = useState("");
+  const [claimingBonus, setClaimingBonus] = useState(false);
 
   useEffect(() => { document.title = "Wallet — Camplink"; }, []);
 
@@ -57,6 +58,16 @@ const Wallet = () => {
     if (error) toast.error(error.message); else { toast.success(`Sent KSh ${n.toLocaleString()} 💸`); setCashTo(""); setCashAmt(""); refresh(); }
   };
 
+  const claimDailyBonus = async () => {
+    setClaimingBonus(true);
+    const { data, error } = await supabase.rpc("claim_daily_bonus" as any);
+    setClaimingBonus(false);
+    if (error) { toast.error(error.message.includes("already claimed") ? "Daily bonus already claimed" : error.message); return; }
+    toast.success("Daily bonus claimed: KSh 1");
+    setCash(Number(data ?? cash + 1));
+    refresh();
+  };
+
   return (
     <AppShell>
       <div className="flex items-center gap-2 mb-4"><WalletIcon className="h-6 w-6 text-accent" /><h1 className="text-2xl font-extrabold">My Wallet</h1></div>
@@ -66,6 +77,16 @@ const Wallet = () => {
         <p className="text-xs text-muted-foreground">Wallet balance</p>
         <p className="text-4xl font-extrabold">KSh {cash.toLocaleString()}</p>
         <p className="text-[11px] text-muted-foreground mt-2">Real money. Deposit with M-Pesa or card, send to other users, or spend in the marketplace.</p>
+      </Card>
+
+      <Card className="gradient-card p-4 mb-4 flex items-center justify-between gap-3">
+        <div>
+          <p className="font-semibold text-sm flex items-center gap-2"><Gift className="h-4 w-4 text-accent" />Daily bonus</p>
+          <p className="text-xs text-muted-foreground mt-1">Claim KSh 1 once every day.</p>
+        </div>
+        <Button className="gradient-accent shrink-0" onClick={claimDailyBonus} disabled={claimingBonus}>
+          {claimingBonus ? "Claiming..." : "Claim KSh 1"}
+        </Button>
       </Card>
 
       <Tabs defaultValue="deposit">
