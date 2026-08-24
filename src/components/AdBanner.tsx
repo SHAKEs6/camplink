@@ -10,7 +10,7 @@ export const AdBanner = () => {
   const [idx, setIdx] = useState(0);
 
   useEffect(() => {
-    supabase.from("ads").select("id,title,body,image_url,link_url")
+    supabase.from("ads").select("id,title,body,image_url,video_url,link_url")
       .eq("active", true)
       .order("priority", { ascending: false })
       .order("created_at", { ascending: false })
