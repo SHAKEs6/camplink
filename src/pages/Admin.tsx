@@ -50,7 +50,7 @@ const Admin = () => {
   const broadcast = async () => {
     if (!bcTitle.trim()) { toast.error("Title required"); return; }
     setSending(true);
-    const rows = users.map(u => ({ user_id: u.id, title: bcTitle.trim(), body: bcBody.trim() || null, type: "admin_broadcast" }));
+    const rows = users.map(u => ({ user_id: u.id, title: bcTitle.trim(), body: bcBody.trim() || null, type: "admin_broadcast", link: "/dashboard" }));
     const { error } = await supabase.from("notifications").insert(rows);
     setSending(false);
     if (error) { toast.error(error.message); return; }

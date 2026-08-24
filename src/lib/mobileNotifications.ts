@@ -1,6 +1,7 @@
 // Mobile notifications: separate channel from browser desktop notifications.
 // Uses vibration + a beep + (on mobile) the Notification API tagged "mobile".
 // Toggleable via localStorage key "mobile-notify".
+import { getNotificationHref } from "@/lib/notificationLink";
 
 const KEY = "mobile-notify";
 
@@ -34,8 +35,9 @@ export const showMobileNotification = (title: string, body?: string, link?: stri
   beep();
   if ("Notification" in window && Notification.permission === "granted") {
     try {
-      const n = new Notification("📱 " + title, { body, icon: "/favicon.png", tag: "mobile-" + (link ?? title), silent: false });
-      if (link) n.onclick = () => { window.focus(); window.location.href = link; n.close(); };
+      const href = getNotificationHref(link);
+      const n = new Notification("📱 " + title, { body, icon: "/favicon.png", tag: "mobile-" + href, silent: false });
+      n.onclick = () => { window.focus(); window.location.href = href; n.close(); };
     } catch { /* noop */ }
   }
 };

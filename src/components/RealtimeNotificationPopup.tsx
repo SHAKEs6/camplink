@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
+import { getNotificationHref } from "@/lib/notificationLink";
 
 type N = { id: string; title: string; body: string | null; link: string | null };
 
@@ -35,8 +36,8 @@ export const RealtimeNotificationPopup = () => {
         </DialogHeader>
         <DialogFooter className="flex gap-2">
           <Button variant="outline" className="flex-1" onClick={() => setN(null)}>Dismiss</Button>
-          {n?.link && (
-            <Link to={n.link} className="flex-1" onClick={() => setN(null)}>
+          {n && (
+            <Link to={getNotificationHref(n.link)} className="flex-1" onClick={() => setN(null)}>
               <Button className="w-full gradient-accent">Open</Button>
             </Link>
           )}

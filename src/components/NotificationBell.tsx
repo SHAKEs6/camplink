@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { showBrowserNotification } from "@/lib/browserNotifications";
 import { showMobileNotification } from "@/lib/mobileNotifications";
+import { getNotificationHref } from "@/lib/notificationLink";
 
 type Notification = {
   id: string;
@@ -116,6 +117,7 @@ export const NotificationBell = () => {
             <p className="text-xs text-muted-foreground p-6 text-center">You're all caught up 🎉</p>
           ) : (
             items.map((n) => {
+              const href = getNotificationHref(n.link);
               const inner = (
                 <div
                   className={`p-3 border-b border-border/50 hover:bg-secondary/40 transition-smooth cursor-pointer ${
@@ -135,12 +137,10 @@ export const NotificationBell = () => {
                   </div>
                 </div>
               );
-              return n.link ? (
-                <Link to={n.link} key={n.id} onClick={() => setOpen(false)}>
+              return (
+                <Link to={href} key={n.id} onClick={() => setOpen(false)}>
                   {inner}
                 </Link>
-              ) : (
-                <div key={n.id}>{inner}</div>
               );
             })
           )}

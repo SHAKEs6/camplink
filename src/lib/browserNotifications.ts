@@ -1,4 +1,5 @@
 // Request and show native browser notifications
+import { getNotificationHref } from "@/lib/notificationLink";
 
 export const requestNotificationPermission = async (): Promise<NotificationPermission> => {
   if (!("Notification" in window)) return "denied";
@@ -12,11 +13,12 @@ export const showBrowserNotification = (title: string, body?: string, link?: str
     // skip when tab visible to avoid being annoying for in-app toasts
   }
   try {
-    const n = new Notification(title, { body, icon: "/favicon.png", badge: "/favicon.png", tag: link ?? title });
-    if (link) {
+    const href = getNotificationHref(link);
+    const n = new Notification(title, { body, icon: "/favicon.png", badge: "/favicon.png", tag: href });
+    if (href) {
       n.onclick = () => {
         window.focus();
-        window.location.href = link;
+        window.location.href = href;
         n.close();
       };
     }
