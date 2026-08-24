@@ -13,6 +13,7 @@ import { PayPalButton } from "./PayPalButton";
 import { downloadReceipt } from "@/lib/receipt";
 import { validateDeliveryDetails } from "@/lib/orderValidation";
 import { LocationPicker } from "./LocationPicker";
+import { useAuth } from "@/hooks/useAuth";
 
 type Props = {
   listingId: string;
@@ -23,6 +24,7 @@ type Props = {
 };
 
 export const BuyDialog = ({ listingId, price, title, quantity = 1, trigger }: Props) => {
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [location, setLocation] = useState("");
@@ -49,7 +51,8 @@ export const BuyDialog = ({ listingId, price, title, quantity = 1, trigger }: Pr
     setBusy(false);
     if (error) toast.error(error.message); else {
       const { data: order } = await supabase.from("orders").select("id,amount,quantity,status,provider,mpesa_receipt,created_at,location,pickup_station,delivery_method,delivery_address").eq("id", orderId).maybeSingle();
-      if (order) downloadReceipt(order, title);
+      const { data: profile } = user ? await supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle() : { data: null };
+      if (order) downloadReceipt({ ...order, buyer_name: profile?.display_name }, title);
       toast.success("Order successful"); setOpen(false);
     }
   };

@@ -14,6 +14,7 @@ type Order = {
   id: string;
   listing_id: string | null;
   buyer_id: string;
+  buyer_name?: string | null;
   seller_id: string | null;
   amount: number;
   quantity: number;
@@ -60,7 +61,10 @@ const Orders = () => {
       : { data: [], error: null };
     if (listingsError) setLoadError(listingsError.message);
     const listingById = new Map((listings ?? []).map((listing: { id: string; title: string; image_url: string | null }) => [listing.id, listing]));
-    setOrders(rows.map(order => ({ ...order, listings: order.listing_id ? listingById.get(order.listing_id) ?? null : null })));
+    const buyerIds = [...new Set(rows.map(order => order.buyer_id))];
+    const { data: profiles } = buyerIds.length ? await (supabase as any).from("profiles").select("id,display_name").in("id", buyerIds) : { data: [] };
+    const buyerNames = new Map((profiles ?? []).map((profile: { id: string; display_name: string | null }) => [profile.id, profile.display_name]));
+    setOrders(rows.map(order => ({ ...order, buyer_name: buyerNames.get(order.buyer_id) ?? null, listings: order.listing_id ? listingById.get(order.listing_id) ?? null : null })));
   };
 
   useEffect(() => {

@@ -41,8 +41,9 @@ const PaypalReturn = () => {
       setKind((data as any)?.kind || "");
       if (s === "paid") {
         setStatus("paid"); setMsg((data as any)?.receipt ? `Payment reference: ${(data as any).receipt}` : "");
-        const { data: paidOrder } = await supabase.from("orders").select("id,amount,quantity,status,provider,mpesa_receipt,created_at,location,pickup_station,delivery_method,delivery_address,listing_id").eq("id", orderId).maybeSingle();
-        setOrder(paidOrder);
+        const { data: paidOrder } = await supabase.from("orders").select("id,buyer_id,amount,quantity,status,provider,mpesa_receipt,created_at,location,pickup_station,delivery_method,delivery_address,listing_id").eq("id", orderId).maybeSingle();
+        const { data: profile } = paidOrder ? await supabase.from("profiles").select("display_name").eq("id", paidOrder.buyer_id).maybeSingle() : { data: null };
+        setOrder(paidOrder ? { ...paidOrder, buyer_name: profile?.display_name } : null);
       }
       else if (s === "cancelled") { setStatus("cancelled"); setMsg("You cancelled the payment."); }
       else { setStatus("failed"); setMsg((data as any)?.error || "Payment failed."); }

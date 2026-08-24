@@ -2,6 +2,7 @@ import { jsPDF } from "jspdf";
 
 type ReceiptOrder = {
   id: string;
+  buyer_name?: string | null;
   amount: number;
   quantity: number;
   status: string;
@@ -39,6 +40,7 @@ export const downloadReceipt = (order: ReceiptOrder, title: string) => {
   pdf.setFontSize(11);
   y = 55;
   add("Order:", order.id);
+  add("Buyer:", order.buyer_name || "Camplink buyer");
   add("Date:", new Date(order.created_at).toLocaleString());
   add("Item:", title);
   add("Quantity:", String(order.quantity));
