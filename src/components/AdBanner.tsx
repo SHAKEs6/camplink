@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ExternalLink } from "lucide-react";
 
 type Ad = { id: string; title: string; body: string | null; image_url: string | null; video_url: string | null; link_url: string | null };
@@ -8,6 +9,7 @@ type Ad = { id: string; title: string; body: string | null; image_url: string | 
 export const AdBanner = () => {
   const [ads, setAds] = useState<Ad[]>([]);
   const [idx, setIdx] = useState(0);
+  const [popupOpen, setPopupOpen] = useState(false);
 
   useEffect(() => {
     supabase.from("ads").select("id,title,body,image_url,video_url,link_url")
@@ -15,20 +17,24 @@ export const AdBanner = () => {
       .order("priority", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(10)
-      .then(({ data }) => setAds((data ?? []) as Ad[]));
+      .then(({ data }) => {
+        const loadedAds = (data ?? []) as Ad[];
+        setAds(loadedAds);
+        setPopupOpen(loadedAds.length > 0);
+      });
   }, []);
 
   useEffect(() => {
-    if (ads.length < 2) return;
+    if (ads.length < 2 || ads[idx]?.video_url) return;
     const t = setInterval(() => setIdx(i => (i + 1) % ads.length), 6000);
     return () => clearInterval(t);
-  }, [ads]);
+  }, [ads, idx]);
 
   if (!ads.length) return null;
   const ad = ads[idx];
   const inner = (
     <Card className="gradient-card border-border overflow-hidden flex items-stretch min-h-[80px] transition-smooth hover:shadow-glow">
-      {ad.video_url ? <video src={ad.video_url} muted autoPlay loop playsInline className="w-32 sm:w-48 aspect-video object-cover shrink-0" /> : ad.image_url && <img src={ad.image_url} alt="" className="w-24 sm:w-32 h-full object-cover shrink-0" />}
+      {ad.video_url ? <video src={ad.video_url} muted autoPlay playsInline onEnded={() => setIdx(i => (i + 1) % ads.length)} className="ad-media w-32 sm:w-48 aspect-video object-cover shrink-0" /> : ad.image_url && <img src={ad.image_url} alt="" className="ad-media w-24 sm:w-32 h-full object-cover shrink-0" />}
       <div className="p-3 flex-1 min-w-0">
         <div className="flex items-center gap-1.5 mb-0.5">
           <span className="kicker text-accent text-[10px]">Sponsored</span>
@@ -42,6 +48,18 @@ export const AdBanner = () => {
 
   return (
     <div className="mb-4">
+      <Dialog open={popupOpen} onOpenChange={setPopupOpen}>
+        <DialogContent className="max-w-3xl overflow-hidden p-0 [&_.ad-media]:w-56 [&_.ad-media]:sm:w-96 [&_.ad-media]:h-64">
+          <DialogHeader className="px-5 pt-5">
+            <DialogTitle className="text-left">Sponsored</DialogTitle>
+          </DialogHeader>
+          {!popupOpen && (ad.link_url ? (
+            <a href={ad.link_url} target="_blank" rel="noopener noreferrer" className="block">
+              {inner}
+            </a>
+          ) : inner)}
+        </DialogContent>
+      </Dialog>
       {ad.link_url ? (
         <a href={ad.link_url} target="_blank" rel="noopener noreferrer" className="block">{inner}</a>
       ) : inner}
