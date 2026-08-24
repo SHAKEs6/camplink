@@ -22,6 +22,7 @@ export type Database = {
           created_by: string | null
           id: string
           image_url: string | null
+          video_url: string | null
           link_url: string | null
           priority: number
           title: string
@@ -34,6 +35,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           image_url?: string | null
+          video_url?: string | null
           link_url?: string | null
           priority?: number
           title: string
@@ -46,6 +48,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           image_url?: string | null
+          video_url?: string | null
           link_url?: string | null
           priority?: number
           title?: string

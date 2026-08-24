@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
 
-type Ad = { id: string; title: string; body: string | null; image_url: string | null; link_url: string | null };
+type Ad = { id: string; title: string; body: string | null; image_url: string | null; video_url: string | null; link_url: string | null };
 
 export const AdBanner = () => {
   const [ads, setAds] = useState<Ad[]>([]);
@@ -28,7 +28,7 @@ export const AdBanner = () => {
   const ad = ads[idx];
   const inner = (
     <Card className="gradient-card border-border overflow-hidden flex items-stretch min-h-[80px] transition-smooth hover:shadow-glow">
-      {ad.image_url && <img src={ad.image_url} alt="" className="w-24 h-full object-cover shrink-0" />}
+      {ad.video_url ? <video src={ad.video_url} muted autoPlay loop playsInline className="w-32 sm:w-48 aspect-video object-cover shrink-0" /> : ad.image_url && <img src={ad.image_url} alt="" className="w-24 sm:w-32 h-full object-cover shrink-0" />}
       <div className="p-3 flex-1 min-w-0">
         <div className="flex items-center gap-1.5 mb-0.5">
           <span className="kicker text-accent text-[10px]">Sponsored</span>

@@ -10,7 +10,7 @@ import { Trash2, Megaphone, Save, DollarSign, Upload, Loader2, X } from "lucide-
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 
-type Ad = { id: string; title: string; body: string | null; image_url: string | null; link_url: string | null; active: boolean; priority: number; created_at: string };
+type Ad = { id: string; title: string; body: string | null; image_url: string | null; video_url: string | null; link_url: string | null; active: boolean; priority: number; created_at: string };
 
 export const AdsAdmin = () => {
   const { user } = useAuth();
@@ -18,17 +18,18 @@ export const AdsAdmin = () => {
   const [price, setPrice] = useState<string>("");
   const [savingPrice, setSavingPrice] = useState(false);
   const [usdRate, setUsdRate] = useState<string>("");
-  const [form, setForm] = useState({ title: "", body: "", image_url: "", link_url: "", priority: 0 });
+  const [form, setForm] = useState({ title: "", body: "", image_url: "", video_url: "", link_url: "", priority: 0 });
   const [creating, setCreating] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+    if (!file.type.startsWith("image/")) { toast.error("Choose an image file"); return; }
     if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB"); return; }
     setUploading(true);
     const ext = file.name.split(".").pop() || "jpg";
-    const path = `ads/${user.id}/${Date.now()}.${ext}`;
+    const path = `${user.id}/ads-${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("listing-photos").upload(path, file, { cacheControl: "3600", upsert: false });
     if (error) { toast.error(error.message); setUploading(false); return; }
     const { data } = supabase.storage.from("listing-photos").getPublicUrl(path);
@@ -36,6 +37,23 @@ export const AdsAdmin = () => {
     setUploading(false);
     e.target.value = "";
     toast.success("Image uploaded");
+  };
+
+  const handleVideo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (!file.type.startsWith("video/")) { toast.error("Choose a video file"); return; }
+    if (file.size > 50 * 1024 * 1024) { toast.error("Video must be under 50MB"); return; }
+    setUploading(true);
+    const ext = file.name.split(".").pop() || "mp4";
+    const path = `${user.id}/ad-video-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("listing-photos").upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+    if (error) { toast.error(error.message); setUploading(false); return; }
+    const { data } = supabase.storage.from("listing-photos").getPublicUrl(path);
+    setForm(f => ({ ...f, video_url: data.publicUrl, image_url: "" }));
+    setUploading(false);
+    e.target.value = "";
+    toast.success("Video uploaded");
   };
 
   const load = async () => {
@@ -76,6 +94,7 @@ export const AdsAdmin = () => {
       title: form.title.trim(),
       body: form.body.trim() || null,
       image_url: form.image_url.trim() || null,
+      video_url: form.video_url.trim() || null,
       link_url: form.link_url.trim() || null,
       priority: Number(form.priority) || 0,
       active: true,
@@ -83,7 +102,7 @@ export const AdsAdmin = () => {
     setCreating(false);
     if (error) return toast.error(error.message);
     toast.success("Ad added");
-    setForm({ title: "", body: "", image_url: "", link_url: "", priority: 0 });
+    setForm({ title: "", body: "", image_url: "", video_url: "", link_url: "", priority: 0 });
     load();
   };
 
@@ -131,6 +150,13 @@ export const AdsAdmin = () => {
                 <X className="h-4 w-4" />
               </Button>
             </div>
+          ) : form.video_url ? (
+            <div className="relative">
+              <video src={form.video_url} controls className="w-full h-32 object-cover rounded-lg border border-border" />
+              <Button type="button" size="icon" variant="destructive" className="absolute top-2 right-2 h-7 w-7" onClick={() => setForm({ ...form, video_url: "" })}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           ) : (
             <div className="flex gap-2 items-stretch">
               <Input value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })} placeholder="Paste URL…" className="flex-1" />
@@ -140,6 +166,10 @@ export const AdsAdmin = () => {
               </label>
             </div>
           )}
+          {!form.image_url && !form.video_url && <label className="mt-2 inline-flex items-center gap-1 px-3 py-2 rounded-md border border-border cursor-pointer hover:bg-secondary/30 text-xs">
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Upload className="h-4 w-4" /> Upload video</>}
+            <input type="file" accept="video/*" className="hidden" onChange={handleVideo} disabled={uploading} />
+          </label>}
         </div>
         <div><Label className="text-xs">Link URL</Label><Input value={form.link_url} onChange={e => setForm({ ...form, link_url: e.target.value })} placeholder="https://…" /></div>
         <div><Label className="text-xs">Priority (higher = shown first)</Label><Input type="number" value={form.priority} onChange={e => setForm({ ...form, priority: Number(e.target.value) })} /></div>
@@ -150,7 +180,7 @@ export const AdsAdmin = () => {
         {ads.length === 0 && <Card className="p-6 text-center text-muted-foreground text-sm">No ads yet.</Card>}
         {ads.map(a => (
           <Card key={a.id} className="p-3 gradient-card flex items-center gap-3">
-            {a.image_url && <img src={a.image_url} alt="" className="h-14 w-14 rounded object-cover" />}
+            {a.video_url ? <video src={a.video_url} muted className="h-14 w-14 rounded object-cover" /> : a.image_url && <img src={a.image_url} alt="" className="h-14 w-14 rounded object-cover" />}
             <div className="min-w-0 flex-1">
               <p className="font-semibold text-sm truncate">{a.title}</p>
               {a.body && <p className="text-xs text-muted-foreground line-clamp-2">{a.body}</p>}
