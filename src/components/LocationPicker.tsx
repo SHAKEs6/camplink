@@ -33,7 +33,7 @@ export const LocationPicker = ({ label, text, latitude, longitude, onTextChange,
   };
 
   const mapUrl = latitude != null && longitude != null
-    ? `https://www.openstreetmap.org/export/embed.html?bbox=${longitude - 0.01}%2C${latitude - 0.01}%2C${longitude + 0.01}%2C${latitude + 0.01}&layer=mapnik&marker=${latitude}%2C${longitude}`
+    ? `https://www.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`
     : null;
 
   return (
@@ -49,7 +49,7 @@ export const LocationPicker = ({ label, text, latitude, longitude, onTextChange,
       {latitude != null && longitude != null ? (
         <div className="overflow-hidden rounded-lg border border-primary/20">
           <iframe title="Selected location" src={mapUrl!} className="h-36 w-full" loading="lazy" />
-          <p className="flex items-center gap-1 px-2 py-1 text-[10px] text-muted-foreground"><MapPin className="h-3 w-3" />{latitude}, {longitude}</p>
+          <p className="flex items-center gap-1 px-2 py-1 text-[10px] text-muted-foreground"><MapPin className="h-3 w-3" />Google Maps pin: {latitude}, {longitude}</p>
         </div>
       ) : <p className="text-[10px] text-muted-foreground">Use the location button to pin the exact position.</p>}
     </div>

@@ -83,7 +83,7 @@ export const ListingCard = ({ listing, onDelete }: { listing: Listing; onDelete?
         </div>
         <p className="text-primary font-bold">KSh {Number(listing.price).toLocaleString()}</p>
         {listing.location && <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" />{listing.location}</p>}
-        {listing.location_latitude != null && listing.location_longitude != null && <a className="text-[11px] text-primary underline" target="_blank" rel="noreferrer" href={`https://www.openstreetmap.org/?mlat=${listing.location_latitude}&mlon=${listing.location_longitude}#map=16/${listing.location_latitude}/${listing.location_longitude}`}>View exact listing location</a>}
+        {listing.location_latitude != null && listing.location_longitude != null && <a className="text-[11px] text-primary underline" target="_blank" rel="noreferrer" href={`https://www.google.com/maps/search/?api=1&query=${listing.location_latitude},${listing.location_longitude}`}>View exact listing location in Google Maps</a>}
         {listing.description && <p className="text-xs text-muted-foreground line-clamp-2">{listing.description}</p>}
 
         <div className="flex flex-wrap gap-1.5 pt-1">
