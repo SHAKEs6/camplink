@@ -41,8 +41,9 @@ export const LocationPicker = ({ label, text, latitude, longitude, onTextChange,
       <Label>{label}{required ? " *" : ""}</Label>
       <div className="flex gap-2">
         <Input value={text} onChange={e => onTextChange(e.target.value)} placeholder="County / city / area" />
-        <Button type="button" variant="outline" size="icon" onClick={useCurrentLocation} disabled={loading} title="Use current location">
+        <Button type="button" variant="outline" onClick={useCurrentLocation} disabled={loading} title="Use current location" className="shrink-0 px-3">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
+          <span className="ml-1 hidden sm:inline">Pin GPS</span>
         </Button>
       </div>
       {latitude != null && longitude != null ? (
