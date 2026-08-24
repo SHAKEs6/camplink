@@ -53,11 +53,11 @@ export const AdBanner = () => {
           <DialogHeader className="px-5 pt-5">
             <DialogTitle className="text-left">Sponsored</DialogTitle>
           </DialogHeader>
-          {!popupOpen && (ad.link_url ? (
+          {ad.link_url ? (
             <a href={ad.link_url} target="_blank" rel="noopener noreferrer" className="block">
               {inner}
             </a>
-          ) : inner)}
+          ) : inner}
         </DialogContent>
       </Dialog>
       {ad.link_url ? (
