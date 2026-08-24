@@ -33,7 +33,7 @@ import { Decorations } from "./components/Decorations";
 import { OneSignalProvider } from "./components/OneSignalProvider";
 import NotFound from "./pages/NotFound.tsx";
 import { CookieConsent } from "./components/CookieConsent";
-import { AIAssistant } from "./components/AIAssistant";
+import { ChatSupportButton } from "./components/ChatSupportButton";
 
 const queryClient = new QueryClient();
 
@@ -76,7 +76,7 @@ const App = () => (
           <RealtimeNotificationPopup />
           <MusicPlayer />
           <Decorations />
-          <AIAssistant />
+          <ChatSupportButton />
         </AuthProvider>
         </ThemeProvider>
       </BrowserRouter>
