@@ -109,7 +109,7 @@ export async function fulfilOrder(admin: any, orderId: string, receipt: string |
       user_id: order.seller_id,
       title: '💰 New sale',
       body: `You received KSh ${Number(order.amount).toLocaleString()} via PesaPal`,
-      type: 'payment', link: '/wallet',
+      type: 'payment', link: `/orders?order=${order.id}`,
     });
   }
 

@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
       const desc = status === 'paid'
         ? `KSh ${order.amount.toLocaleString()} confirmed${receipt ? ` (${receipt})` : ''}`
         : resultDesc;
-      const link = isUnlock ? '/market' : '/wallet';
+      const link = isUnlock ? '/market' : `/orders?order=${order.id}`;
       const notifs: any[] = [
         { user_id: order.buyer_id, title, body: desc, type: 'payment', link },
       ];

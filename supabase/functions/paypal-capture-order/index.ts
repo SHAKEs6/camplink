@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
         user_id: order.seller_id,
         title: '💰 New sale',
         body: `You received KSh ${Number(order.amount).toLocaleString()} via PayPal`,
-        type: 'payment', link: '/wallet',
+        type: 'payment', link: `/orders?order=${order.id}`,
       });
     }
 
