@@ -830,6 +830,7 @@ export type Database = {
           amount: number
           code: string
           created_at: string
+          discount_ksh: number
           expires_at: string | null
           id: string
           max_uses: number
@@ -840,6 +841,7 @@ export type Database = {
           amount: number
           code: string
           created_at?: string
+          discount_ksh?: number
           expires_at?: string | null
           id?: string
           max_uses?: number
@@ -850,6 +852,7 @@ export type Database = {
           amount?: number
           code?: string
           created_at?: string
+          discount_ksh?: number
           expires_at?: string | null
           id?: string
           max_uses?: number

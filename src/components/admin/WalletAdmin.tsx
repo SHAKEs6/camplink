@@ -70,7 +70,7 @@ export const WalletAdmin = () => {
     const amt = parseInt(pAmt, 10); const uses = parseInt(pUses, 10) || 1;
     if (!pCode.trim() || !amt) { toast.error("Code + amount required"); return; }
     setBusy(true);
-    const { error } = await supabase.from("promo_codes").insert({ code: pCode.trim().toUpperCase(), amount: amt, max_uses: uses });
+    const { error } = await supabase.from("promo_codes").insert({ code: pCode.trim().toUpperCase(), amount: amt, discount_ksh: amt, max_uses: uses });
     setBusy(false);
     if (error) toast.error(error.message); else { toast.success("Promo created"); setPCode(""); setPAmt(""); setPUses("1"); load(); }
   };
@@ -103,14 +103,14 @@ export const WalletAdmin = () => {
         <p className="font-semibold text-sm flex items-center gap-2 mb-2"><Ticket className="h-4 w-4" />Promo codes</p>
         <div className="grid grid-cols-3 gap-2 mb-2">
           <Input value={pCode} onChange={e => setPCode(e.target.value.toUpperCase())} placeholder="CODE" />
-          <Input type="number" value={pAmt} onChange={e => setPAmt(e.target.value)} placeholder="Points" />
+          <Input type="number" value={pAmt} onChange={e => setPAmt(e.target.value)} placeholder="Discount KSh" />
           <Input type="number" value={pUses} onChange={e => setPUses(e.target.value)} placeholder="Uses" />
         </div>
         <Button onClick={createPromo} disabled={busy} className="w-full gradient-accent">Create promo</Button>
         <div className="mt-3 space-y-1">
           {promos.map(p => (
             <div key={p.id} className="flex items-center justify-between border-t border-border pt-2">
-              <div className="text-xs"><span className="font-bold">{p.code}</span> · {p.amount} pts · {p.used_count}/{p.max_uses}</div>
+              <div className="text-xs"><span className="font-bold">{p.code}</span> · KSh {p.amount} off · {p.used_count}/{p.max_uses}</div>
               <Button size="icon" variant="ghost" className="text-destructive" onClick={() => deletePromo(p.id)}><Trash2 className="h-4 w-4" /></Button>
             </div>
           ))}

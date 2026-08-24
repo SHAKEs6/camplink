@@ -13,7 +13,7 @@ type Props = {
   disabled?: boolean;
   label?: string;
   className?: string;
-  delivery?: { location: string; pickup_station: string; delivery_method: string; address: string; latitude?: number | null; longitude?: number | null };
+  delivery?: { location: string; pickup_station: string; delivery_method: string; address: string; latitude?: number | null; longitude?: number | null; promo_code?: string };
   beforeStart?: () => boolean;
 };
 

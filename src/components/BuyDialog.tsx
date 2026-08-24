@@ -30,10 +30,11 @@ export const BuyDialog = ({ listingId, price, title, quantity = 1, trigger }: Pr
   const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "door">("pickup");
   const [address, setAddress] = useState("");
   const [coordinates, setCoordinates] = useState<{ latitude: number | null; longitude: number | null }>({ latitude: null, longitude: null });
+  const [promoCode, setPromoCode] = useState("");
   const [orderQuantity, setOrderQuantity] = useState(Math.max(1, Math.min(99, quantity)));
   const total = price * orderQuantity;
 
-  const delivery = { location: location.trim(), pickup_station: pickupStation.trim(), delivery_method: deliveryMethod, address: address.trim(), latitude: coordinates.latitude, longitude: coordinates.longitude };
+  const delivery = { location: location.trim(), pickup_station: pickupStation.trim(), delivery_method: deliveryMethod, address: address.trim(), latitude: coordinates.latitude, longitude: coordinates.longitude, promo_code: promoCode.trim() };
 
   const validateDelivery = () => {
     const error = validateDeliveryDetails(delivery);
@@ -44,7 +45,7 @@ export const BuyDialog = ({ listingId, price, title, quantity = 1, trigger }: Pr
   const buyWithWallet = async () => {
     if (!validateDelivery() || coordinates.latitude == null || coordinates.longitude == null) { if (coordinates.latitude == null || coordinates.longitude == null) toast.error("Pin your exact delivery location"); return; }
     setBusy(true);
-    const { data: orderId, error } = await supabase.rpc("wallet_cash_purchase_with_location" as any, { _listing_id: listingId, _quantity: orderQuantity, _location: delivery.location, _pickup_station: delivery.pickup_station, _delivery_method: delivery.delivery_method, _address: delivery.address || null, _latitude: coordinates.latitude, _longitude: coordinates.longitude });
+    const { data: orderId, error } = await supabase.rpc("wallet_cash_purchase_with_location" as any, { _listing_id: listingId, _quantity: orderQuantity, _location: delivery.location, _pickup_station: delivery.pickup_station, _delivery_method: delivery.delivery_method, _address: delivery.address || null, _latitude: coordinates.latitude, _longitude: coordinates.longitude, _promo_code: promoCode.trim() || null });
     setBusy(false);
     if (error) toast.error(error.message); else {
       const { data: order } = await supabase.from("orders").select("id,amount,quantity,status,provider,mpesa_receipt,created_at,location,pickup_station,delivery_method,delivery_address").eq("id", orderId).maybeSingle();
@@ -77,6 +78,8 @@ export const BuyDialog = ({ listingId, price, title, quantity = 1, trigger }: Pr
           <div className="space-y-2">
             <Label className="text-xs">Number of items</Label>
             <Input type="number" min={1} max={99} value={orderQuantity} onChange={e => setOrderQuantity(Math.max(1, Math.min(99, Number(e.target.value) || 1)))} />
+            <Label className="text-xs">Promo code</Label>
+            <Input value={promoCode} onChange={e => setPromoCode(e.target.value.toUpperCase())} placeholder="Optional discount code" />
             <LocationPicker label="Choose your exact location" text={location} latitude={coordinates.latitude} longitude={coordinates.longitude} onTextChange={setLocation} onCoordinatesChange={(latitude, longitude) => setCoordinates({ latitude, longitude })} required />
             <Label className="text-xs">Pickup station</Label>
             <Input value={pickupStation} onChange={e => setPickupStation(e.target.value)} placeholder="Station or landmark" />

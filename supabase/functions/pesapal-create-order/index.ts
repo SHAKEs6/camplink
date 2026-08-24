@@ -83,6 +83,19 @@ Deno.serve(async (req) => {
     }).select('id').single();
     if (oerr) return json({ error: oerr.message }, 500);
 
+    if (kind === 'purchase' && typeof body?.promo_code === 'string' && body.promo_code.trim()) {
+      const { data: promo, error: promoError } = await admin.from('promo_codes').select('id,active,amount,discount_ksh,used_count,max_uses,expires_at').eq('code', body.promo_code.trim().toUpperCase()).maybeSingle();
+      if (promoError || !promo || !promo.active || (promo.expires_at && new Date(promo.expires_at) < new Date()) || promo.used_count >= promo.max_uses) {
+        await admin.from('orders').delete().eq('id', order.id);
+        return json({ error: 'Invalid or unavailable promo code' }, 400);
+      }
+      const discount = Math.min(Math.max(0, Number(promo.discount_ksh ?? promo.amount ?? 0)), amount - 1);
+      amount -= discount;
+      const { error: redemptionError } = await admin.rpc('consume_promo_code', { _code: body.promo_code, _user_id: userId, _order_id: order.id });
+      if (redemptionError) { await admin.from('orders').delete().eq('id', order.id); return json({ error: redemptionError.message }, 400); }
+      await admin.from('orders').update({ amount }).eq('id', order.id);
+    }
+
     const ipnUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/pesapal-ipn`;
     const ipnId = await getIpnId(admin, ipnUrl);
     if (!ipnId) {
