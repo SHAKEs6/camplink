@@ -1,19 +1,22 @@
 import { NavLink } from "react-router-dom";
 import { Home, ShoppingBag, Heart, Megaphone, MessageCircle, User, Package } from "lucide-react";
+import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 
-const items = [
+const baseItems = [
   { to: "/", label: "Home", icon: Home, end: true },
   { to: "/market", label: "Market", icon: ShoppingBag },
   { to: "/community", label: "Community", icon: Megaphone },
-  { to: "/dating", label: "Hookup", icon: Heart },
   { to: "/chat", label: "Chat", icon: MessageCircle },
   { to: "/profile", label: "Profile", icon: User },
   { to: "/orders", label: "Orders", icon: Package },
 ];
 
-export const BottomNav = () => (
-  <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur-lg md:hidden">
-    <div className="mx-auto grid max-w-2xl grid-cols-7">
+export const BottomNav = () => {
+  const { hookup_enabled } = useFeatureFlags();
+  const items = hookup_enabled ? [...baseItems.slice(0, 3), { to: "/dating", label: "Hookup", icon: Heart }, ...baseItems.slice(3)] : baseItems;
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur-lg md:hidden">
+    <div className={`mx-auto grid max-w-2xl ${hookup_enabled ? "grid-cols-7" : "grid-cols-6"}`}>
       {items.map(({ to, label, icon: Icon, end }) => (
         <NavLink
           key={to}
@@ -30,5 +33,6 @@ export const BottomNav = () => (
         </NavLink>
       ))}
     </div>
-  </nav>
-);
+    </nav>
+  );
+};

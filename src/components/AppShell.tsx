@@ -11,9 +11,11 @@ import { NotificationBell } from "./NotificationBell";
 import { OfflineBanner } from "./OfflineBanner";
 import { DownloadAppButton } from "./DownloadAppButton";
 import { Button } from "@/components/ui/button";
+import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 
 export const AppShell = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
+  const { hookup_enabled } = useFeatureFlags();
   const [avatar, setAvatar] = useState<string | null>(null);
   const initials = (user?.email ?? "U").slice(0, 2).toUpperCase();
   useEffect(() => {
@@ -34,7 +36,7 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
               { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
               { to: "/market", label: "Market", icon: ShoppingBag },
               { to: "/community", label: "Community", icon: Megaphone },
-              { to: "/dating", label: "Hookup", icon: Heart },
+              ...(hookup_enabled ? [{ to: "/dating", label: "Hookup", icon: Heart }] : []),
               { to: "/chat", label: "Chat", icon: MessageCircle },
               { to: "/wallet", label: "Wallet", icon: Wallet },
               { to: "/orders", label: "Orders", icon: Package },

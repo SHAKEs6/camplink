@@ -14,9 +14,11 @@ import { MultiImageUpload } from "@/components/MultiImageUpload";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
+import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 
 const DatingEdit = () => {
   const { user } = useAuth();
+  const { hookup_enabled } = useFeatureFlags();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -33,6 +35,8 @@ const DatingEdit = () => {
   const [active, setActive] = useState(true);
 
   useEffect(() => { document.title = "My Dating Profile — Camplink"; }, []);
+
+  if (!hookup_enabled) return <AppShell><Card className="p-8 text-center gradient-card text-muted-foreground">Hookup is not available yet.</Card></AppShell>;
 
   useEffect(() => {
     if (!user) return;

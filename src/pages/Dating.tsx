@@ -10,6 +10,7 @@ import { Heart, MessageCircle, Search, Settings, ThumbsDown, X } from "lucide-re
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { PhotoLightbox } from "@/components/PhotoLightbox";
+import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 
 type DP = {
   id: string; user_id: string; display_name: string;
@@ -20,6 +21,7 @@ type DP = {
 
 const Dating = () => {
   const { user, isAdmin } = useAuth();
+  const { hookup_enabled } = useFeatureFlags();
   const navigate = useNavigate();
   const [profiles, setProfiles] = useState<DP[]>([]);
   const [q, setQ] = useState("");
@@ -28,6 +30,8 @@ const Dating = () => {
   const [reactions, setReactions] = useState<Record<string, { likes: number; dislikes: number; mine: "like" | "dislike" | null }>>({});
 
   useEffect(() => { document.title = "Hookup — Camplink"; }, []);
+
+  if (!hookup_enabled) return <AppShell><Card className="p-8 text-center gradient-card text-muted-foreground">Hookup is not available yet.</Card></AppShell>;
 
   const loadReactions = async (uids: string[]) => {
     if (!uids.length) return;

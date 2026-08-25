@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash2, Shield, Send, Ban, CheckCircle2, MessageCircle, Wallet as WalletIcon, Film, Users, Megaphone, KeyRound } from "lucide-react";
+import { Trash2, Shield, Send, Ban, CheckCircle2, MessageCircle, Heart, Wallet as WalletIcon, Film, Users, Megaphone, KeyRound, Power } from "lucide-react";
 import { ThemeEditor } from "@/components/ThemeEditor";
 import { WalletAdmin } from "@/components/admin/WalletAdmin";
 import { ReelsAdmin } from "@/components/admin/ReelsAdmin";
@@ -29,18 +29,21 @@ const Admin = () => {
   const [bcBody, setBcBody] = useState("");
   const [sending, setSending] = useState(false);
   const [saleFeeCents, setSaleFeeCents] = useState(0);
+  const [featureFlags, setFeatureFlags] = useState({ reels_enabled: false, hookup_enabled: false });
 
   useEffect(() => { document.title = "Admin — Camplink"; }, []);
 
   const load = async () => {
-    const [{ data: l }, { data: p }, { data: r }, { data: fees }] = await Promise.all([
+    const [{ data: l }, { data: p }, { data: r }, { data: fees }, { data: settings }] = await Promise.all([
       supabase.from("listings").select("*").order("created_at", { ascending: false }),
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("reviews").select("*").order("created_at", { ascending: false }),
       (supabase as any).from("admin_sale_fees").select("fee_cents"),
+      (supabase as any).from("app_settings").select("reels_enabled, hookup_enabled").eq("id", 1).maybeSingle(),
     ]);
     setListings(l ?? []); setUsers(p ?? []); setReviews(r ?? []);
     setSaleFeeCents((fees ?? []).reduce((total: number, fee: { fee_cents: number }) => total + Number(fee.fee_cents), 0));
+    if (settings) setFeatureFlags({ reels_enabled: !!settings.reels_enabled, hookup_enabled: !!settings.hookup_enabled });
   };
   useEffect(() => { load(); }, []);
 
@@ -128,9 +131,33 @@ const Admin = () => {
     load();
   };
 
+  const toggleFeature = async (feature: "reels_enabled" | "hookup_enabled") => {
+    const next = !featureFlags[feature];
+    const { error } = await (supabase as any).from("app_settings").update({ [feature]: next }).eq("id", 1);
+    if (error) { toast.error(error.message); return; }
+    setFeatureFlags(current => ({ ...current, [feature]: next }));
+    toast.success(`${feature === "reels_enabled" ? "Reels" : "Hookup"} ${next ? "activated" : "deactivated"}`);
+  };
+
   return (
     <AppShell>
       <div className="flex items-center gap-2 mb-4"><Shield className="h-6 w-6 text-accent" /><h1 className="text-2xl font-extrabold">Admin Panel</h1></div>
+
+      <Card className="gradient-card p-4 mb-4 space-y-3">
+        <p className="font-semibold text-sm flex items-center gap-2"><Power className="h-4 w-4" />Feature access</p>
+        <div className="flex items-center justify-between gap-3">
+          <div><p className="text-sm font-medium">Reels</p><p className="text-xs text-muted-foreground">{featureFlags.reels_enabled ? "Currently visible to users" : "Currently hidden from users"}</p></div>
+          <Button size="sm" variant={featureFlags.reels_enabled ? "destructive" : "default"} onClick={() => toggleFeature("reels_enabled")}>
+            <Film className="h-3 w-3 mr-1" />{featureFlags.reels_enabled ? "Deactivate Reels" : "Activate Reels"}
+          </Button>
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <div><p className="text-sm font-medium">Hookup</p><p className="text-xs text-muted-foreground">{featureFlags.hookup_enabled ? "Currently visible to users" : "Currently hidden from users"}</p></div>
+          <Button size="sm" variant={featureFlags.hookup_enabled ? "destructive" : "default"} onClick={() => toggleFeature("hookup_enabled")}>
+            <Heart className="h-3 w-3 mr-1" />{featureFlags.hookup_enabled ? "Deactivate Hookup" : "Activate Hookup"}
+          </Button>
+        </div>
+      </Card>
 
       <ThemeEditor />
 

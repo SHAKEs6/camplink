@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Heart, MessageCircle, Share2, Bookmark, Volume2, VolumeX, Loader2, Send, X, CornerDownRight, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { detectReel } from "@/lib/reelEmbed";
+import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 
 type Reel = {
   id: string;
@@ -294,6 +295,7 @@ const CommentsSheet = ({ reelId, onClose }: { reelId: string; onClose: () => voi
 };
 
 const Reels = () => {
+  const { reels_enabled } = useFeatureFlags();
   const [reels, setReels] = useState<Reel[]>([]);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -304,6 +306,8 @@ const Reels = () => {
   const scrollerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { document.title = "Reels — Camplink"; }, []);
+
+  if (!reels_enabled) return <div className="min-h-screen bg-black flex items-center justify-center text-white/70">Reels are not available yet.</div>;
 
   const fetchPage = useCallback(async (p: number) => {
     setLoading(true);
